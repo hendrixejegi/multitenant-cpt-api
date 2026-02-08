@@ -2,9 +2,11 @@
   "name": "multitenant-cpt-api",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "tsc",
+    "start": "node dist/server.js",
+    "dev": "nodemon",
+    "lint": "eslint 'src/**/*.ts'"
   },
   "repository": {
     "type": "git",
