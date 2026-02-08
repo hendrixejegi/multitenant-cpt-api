@@ -20,12 +20,14 @@
     "url": "https://github.com/hendrixejegi/multitenant-cpt-api/issues"
   },
   "homepage": "https://github.com/hendrixejegi/multitenant-cpt-api#readme",
+  "dependencies": {
+    "dotenv": "^17.2.4",
+    "express": "^5.2.1"
+  },
   "devDependencies": {
     "@types/express": "^5.0.6",
     "@types/node": "^25.2.2",
-    "dotenv": "^17.2.4",
     "eslint": "^10.0.0",
-    "express": "^5.2.1",
     "install": "^0.13.0",
     "nodemon": "^3.1.11",
     "npm": "^11.9.0",
