@@ -1,11 +1,11 @@
 import config from './config';
-import express, { Response } from 'express';
+import express, { Request, Response } from 'express';
 import errorHandler from './middlewares/error-handler';
 import { AppError } from './utils/error';
 
 const app = express();
 
-app.get('/', (req, res: Response) => {
+app.get('/', (req: Request, res: Response) => {
   res.status(200).send(`<h1>Welcome</h1>`);
 
   // throw new AppError({
