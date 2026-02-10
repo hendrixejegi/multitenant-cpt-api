@@ -7,7 +7,7 @@ interface CustomError {
   data?: unknown;
 }
 
-export class AppError extends Error {
+class AppError extends Error {
   status: number;
   code: ErrorCodes;
   data: unknown;
@@ -21,7 +21,7 @@ export class AppError extends Error {
   }
 }
 
-export function getErrorMessage(err: unknown) {
+function getErrorMessage(err: any) {
   if (err === null || typeof err === 'string') {
     return err;
   }
@@ -36,3 +36,13 @@ export function getErrorMessage(err: unknown) {
 
   return null;
 }
+
+function errorToPlain(err: any) {
+  const obj: Record<string, any> = {};
+  Object.getOwnPropertyNames(err).forEach((k) => {
+    obj[k] = err[k];
+  });
+  return obj;
+}
+
+export { AppError, getErrorMessage, errorToPlain };
