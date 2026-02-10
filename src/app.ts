@@ -1,6 +1,6 @@
 import config from './config';
 import express, { Request, Response } from 'express';
-import errorHandler from './middlewares/error-handler';
+import errorHandler from './middlewares/error.middleware';
 import { AppError } from './utils/error';
 
 const app = express();
