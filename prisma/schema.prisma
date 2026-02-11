@@ -89,10 +89,10 @@ model Attempt {
   exam_id         String
   started_at      DateTime   @default(now())
   submitted_at    DateTime
-  correct_answers Int
-  wrong_answers   Int
-  status          StatusEnum
-  score           Int
+  correct_answers Int        @default(0)
+  wrong_answers   Int        @default(0)
+  status          StatusEnum @default(IN_PROGRESS)
+  score           Int        @default(0)
   created_at      DateTime   @default(now())
 
   exam Exam @relation(fields: [exam_id], references: [id])
