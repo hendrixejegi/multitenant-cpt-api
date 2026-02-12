@@ -1,4 +1,4 @@
-import { Request, Response, NextFunction } from 'express';
+import type { Request, Response, NextFunction } from 'express';
 import config from '../config';
 import { AppError, errorToPlain, getErrorMessage } from '../utils/error';
 
