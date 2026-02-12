@@ -68,7 +68,7 @@ function handlePrismaError(err: any, message: string) {
 
     throw new AppError({
       status: StatusCodes.FAILED_DEPENDENCY,
-      reason: err?.message,
+      reason: err.message || ReasonPhrases.FAILED_DEPENDENCY,
       message,
       data: {
         prismaCode: code || errorCode,
