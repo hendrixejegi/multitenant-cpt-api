@@ -1,8 +1,8 @@
-import { PrismaClientKnownRequestError } from '@prisma/client/runtime/client';
 import type { AttemptCreateInput } from '../generated/prisma/models';
-import { AppError } from '../utils/error';
+import { AppError, handlePrismaError } from '../utils/error';
 import { prisma } from '../utils/prisma';
 import { StatusEnum } from '../generated/prisma/enums';
+import { ReasonPhrases, StatusCodes } from 'http-status-codes';
 
 async function createAttempt(data: AttemptCreateInput) {
   const attempt = await prisma.attempt.create({ data });
@@ -14,8 +14,8 @@ async function getAttemptById(id: string) {
 
   if (attempt === null) {
     throw new AppError({
-      status: 404,
-      code: 'not_found',
+      status: StatusCodes.NOT_FOUND,
+      reason: ReasonPhrases.NOT_FOUND,
       message: `Attempt with id: ${id} does not exist`,
     });
   }
@@ -33,14 +33,7 @@ async function incrementCorrectAnswers(attemptId: string) {
       data: { correct_answers: attempt.correct_answers },
     });
   } catch (error) {
-    if (error instanceof PrismaClientKnownRequestError) {
-      throw new AppError({
-        status: 424,
-        code: 'bad_request',
-        message: `Failed to update attempt with code: ${error.code}`,
-      });
-    }
-
+    handlePrismaError(error, `Failed to update attempt with id: ${attemptId}`);
     throw error;
   }
 
@@ -57,14 +50,7 @@ async function incrementWrongAnswers(attemptId: string) {
       data: { wrong_answers: attempt.wrong_answers },
     });
   } catch (error) {
-    if (error instanceof PrismaClientKnownRequestError) {
-      throw new AppError({
-        status: 424,
-        code: 'bad_request',
-        message: `Failed to update attempt with code: ${error.code}`,
-      });
-    }
-
+    handlePrismaError(error, `Failed to update attempt with id: ${attemptId}`);
     throw error;
   }
 
@@ -83,14 +69,7 @@ async function updateAttemptStatus(attemptId: string, status: StatusEnum) {
       },
     });
   } catch (error) {
-    if (error instanceof PrismaClientKnownRequestError) {
-      throw new AppError({
-        status: 424,
-        code: 'bad_request',
-        message: `Failed to update attempt with code: ${error.code}`,
-      });
-    }
-
+    handlePrismaError(error, `Failed to update attempt with id: ${attemptId}`);
     throw error;
   }
 
@@ -108,14 +87,7 @@ async function calculateAttemptScore(attemptId: string) {
   try {
     await prisma.attempt.update({ where: { id: attemptId }, data: { score } });
   } catch (error) {
-    if (error instanceof PrismaClientKnownRequestError) {
-      throw new AppError({
-        status: 424,
-        code: 'bad_request',
-        message: `Failed to update attempt with code: ${error.code}`,
-      });
-    }
-
+    handlePrismaError(error, `Failed to update attempt with id: ${attemptId}`);
     throw error;
   }
 

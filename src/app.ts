@@ -1,5 +1,5 @@
 import config from './config';
-import express, { Request, Response } from 'express';
+import express, { type Request, type Response } from 'express';
 import errorHandler from './middlewares/error.middleware';
 import { AppError } from './utils/error';
 
