@@ -18,8 +18,8 @@ export default function errorHandler(
   }
 
   if (err instanceof AppError) {
-    const { message, ...rest } = err;
-    res.status(err.status).json({ type: 'error', message, data: rest });
+    const { message, data } = err;
+    res.status(err.status).json({ type: 'error', message, data });
     return;
   }
 

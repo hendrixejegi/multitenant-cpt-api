@@ -1,22 +1,23 @@
-type ErrorCodes = 'unauthorized' | 'bad_request' | 'not_found';
+import { StatusCodes, ReasonPhrases } from 'http-status-codes';
+import { Prisma } from '../generated/prisma/client';
 
 interface CustomError {
-  status: number;
+  status: StatusCodes;
+  reason: ReasonPhrases | string;
   message: string;
-  code: ErrorCodes;
   data?: unknown;
 }
 
 class AppError extends Error {
-  status: number;
-  code: ErrorCodes;
+  status: StatusCodes;
+  reason: ReasonPhrases | string;
   data: unknown;
 
-  constructor({ status, message, code, data }: CustomError) {
+  constructor({ status, message, reason, data }: CustomError) {
     super();
-    this.message = message;
     this.status = status;
-    this.code = code;
+    this.reason = reason;
+    this.message = message;
     this.data = data;
   }
 }
@@ -45,4 +46,36 @@ function errorToPlain(err: any) {
   return obj;
 }
 
-export { AppError, getErrorMessage, errorToPlain };
+const {
+  PrismaClientKnownRequestError,
+  PrismaClientUnknownRequestError,
+  PrismaClientInitializationError,
+  PrismaClientRustPanicError,
+  PrismaClientValidationError,
+} = Prisma;
+
+function handlePrismaError(err: any, message: string) {
+  if (
+    err instanceof PrismaClientKnownRequestError ||
+    err instanceof PrismaClientUnknownRequestError ||
+    err instanceof PrismaClientInitializationError ||
+    err instanceof PrismaClientRustPanicError ||
+    err instanceof PrismaClientValidationError
+  ) {
+    const code = 'code' in err ? (err as any).code : undefined;
+    const errorCode = 'errorCode' in err ? (err as any).errorCode : undefined;
+    const meta = 'meta' in err ? (err as any).meta : undefined;
+
+    throw new AppError({
+      status: StatusCodes.FAILED_DEPENDENCY,
+      reason: err?.message,
+      message,
+      data: {
+        prismaCode: code || errorCode,
+        meta,
+      },
+    });
+  }
+}
+
+export { AppError, getErrorMessage, errorToPlain, handlePrismaError };
