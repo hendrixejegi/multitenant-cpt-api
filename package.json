@@ -26,6 +26,7 @@
     "@types/express": "^5.0.6",
     "dotenv": "^17.2.4",
     "express": "^5.2.1",
+    "http-status-codes": "^2.3.0",
     "pg": "^8.18.0",
     "zod": "^4.3.6"
   },
