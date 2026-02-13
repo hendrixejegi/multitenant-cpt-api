@@ -1,4 +1,11 @@
-type ErrorCodes = 'unauthorized' | 'bad_request' | 'not_found';
+type ErrorCodes =
+  | 'unauthorized'
+  | 'bad_request'
+  | 'not_found'
+  | 'validation_error'
+  | 'user_exists'
+  | 'invalid_token'
+  | 'invalid_credentials';
 
 interface CustomError {
   status: number;
