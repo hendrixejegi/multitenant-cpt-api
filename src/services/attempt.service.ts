@@ -6,25 +6,28 @@ import { StatusEnum } from '../generated/prisma/enums';
 
 async function createAttempt(data: AttemptCreateInput) {
   const attempt = await prisma.attempt.create({ data });
+  prisma.$disconnect();
   return attempt;
 }
 
 async function getAttemptById(id: string) {
   const attempt = await prisma.attempt.findUnique({ where: { id } });
-
-  if (attempt === null) {
-    throw new AppError({
-      status: 404,
-      code: 'not_found',
-      message: `Attempt with id: ${id} does not exist`,
-    });
-  }
-
+  prisma.$disconnect();
   return attempt;
 }
 
 async function incrementCorrectAnswers(attemptId: string) {
   const attempt = await getAttemptById(attemptId);
+  prisma.$disconnect();
+
+  if (attempt === null) {
+    throw new AppError({
+      status: 400,
+      code: 'not_found',
+      message: 'No attempt found',
+    });
+  }
+
   attempt.correct_answers += 1;
 
   try {
@@ -42,6 +45,8 @@ async function incrementCorrectAnswers(attemptId: string) {
     }
 
     throw error;
+  } finally {
+    prisma.$disconnect();
   }
 
   return attempt.correct_answers;
@@ -49,6 +54,16 @@ async function incrementCorrectAnswers(attemptId: string) {
 
 async function incrementWrongAnswers(attemptId: string) {
   const attempt = await getAttemptById(attemptId);
+  prisma.$disconnect();
+
+  if (attempt === null) {
+    throw new AppError({
+      status: 400,
+      code: 'not_found',
+      message: 'No attempt found',
+    });
+  }
+
   attempt.wrong_answers += 1;
 
   try {
@@ -66,6 +81,8 @@ async function incrementWrongAnswers(attemptId: string) {
     }
 
     throw error;
+  } finally {
+    prisma.$disconnect();
   }
 
   return attempt.wrong_answers;
@@ -92,6 +109,8 @@ async function updateAttemptStatus(attemptId: string, status: StatusEnum) {
     }
 
     throw error;
+  } finally {
+    prisma.$disconnect();
   }
 
   return status;
@@ -99,6 +118,16 @@ async function updateAttemptStatus(attemptId: string, status: StatusEnum) {
 
 async function calculateAttemptScore(attemptId: string) {
   const attempt = await getAttemptById(attemptId);
+  prisma.$disconnect();
+
+  if (attempt === null) {
+    throw new AppError({
+      status: 400,
+      code: 'not_found',
+      message: 'No attempt found',
+    });
+  }
+
   const { correct_answers = 0, wrong_answers = 0 } = attempt;
   const totalQuestionsAnswered = correct_answers + wrong_answers;
 
@@ -117,6 +146,8 @@ async function calculateAttemptScore(attemptId: string) {
     }
 
     throw error;
+  } finally {
+    prisma.$disconnect();
   }
 
   return score;
