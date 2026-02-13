@@ -1,8 +1,12 @@
-import type { ExamCreateInput } from '../generated/prisma/models';
+import type {
+  ExamCreateInput,
+  ExamUpdateInput,
+} from '../generated/prisma/models';
 import { AppError, handlePrismaError } from '../utils/error';
 import { prisma } from '../utils/prisma';
 import { RoleEnum } from '../generated/prisma/enums';
 import { ReasonPhrases, StatusCodes } from 'http-status-codes';
+import { createExamCode, getTenantId } from '../utils/helpers';
 
 const createExam = async (data: ExamCreateInput, tenantId: string) => {
   try {
@@ -113,9 +117,39 @@ const deleteExam = async (examId: string) => {
   }
 };
 
-module.exports = {
+const updateExam = async (
+  examId: string,
+  data: ExamUpdateInput,
+  tenantId: string,
+) => {
+  try {
+    const tenant_id = getTenantId();
+    if (tenantId !== tenant_id) {
+      throw new AppError({
+        status: StatusCodes.UNAUTHORIZED,
+        reason: ReasonPhrases.UNAUTHORIZED,
+        message: 'Unauthorized',
+      });
+    }
+
+    await prisma.exam.update({
+      where: {
+        id: examId,
+        tenant_id: tenantId,
+      },
+      data: data,
+    });
+    return;
+  } catch (error) {
+    handlePrismaError(error, 'Failed to update exam');
+    throw error;
+  }
+};
+
+export {
   createExam,
   getAllExams,
   getExamQuestionsandOptions,
   deleteExam,
+  updateExam,
 };
