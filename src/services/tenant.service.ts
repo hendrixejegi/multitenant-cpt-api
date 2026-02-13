@@ -18,10 +18,14 @@ async function createTenant(data: TenantCreateInput) {
 
   const newTenant = await prisma.tenant.create({ data });
   return newTenant;
+  const tenant = await prisma.tenant.create({ data });
+  prisma.$disconnect();
+  return tenant;
 }
 
 async function getTenantById(id: string) {
   const tenant = await prisma.tenant.findUnique({ where: { id } });
+  prisma.$disconnect();
 
   if (tenant === null) {
     throw new AppError({
@@ -40,6 +44,8 @@ async function deleteTenantById(id: string) {
   } catch (error) {
     handlePrismaError(error, `Failed to delete tenant with id: ${id}`);
     throw error;
+  } finally {
+    prisma.$disconnect();
   }
 }
 
