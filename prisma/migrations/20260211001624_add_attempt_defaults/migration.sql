@@ -1,0 +1,5 @@
+-- AlterTable
+ALTER TABLE "Attempt" ALTER COLUMN "correct_answers" SET DEFAULT 0,
+ALTER COLUMN "wrong_answers" SET DEFAULT 0,
+ALTER COLUMN "status" SET DEFAULT 'IN_PROGRESS',
+ALTER COLUMN "score" SET DEFAULT 0;
