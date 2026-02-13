@@ -1,7 +1,11 @@
-import config from './config';
+import config from './config/config';
 import express, { type Request, type Response } from 'express';
 import errorHandler from './middlewares/error.middleware';
 import { AppError } from './utils/error';
+import initializePassport from './config/passport';
+import passport from 'passport';
+
+initializePassport(passport);
 
 const app = express();
 
