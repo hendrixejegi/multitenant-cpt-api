@@ -1,19 +1,16 @@
 import { ReasonPhrases, StatusCodes } from 'http-status-codes';
-import type {
-  TenantCreateInput,
-  UserCreateInput,
-} from '../generated/prisma/models';
+import type { UserCreateInput } from '../generated/prisma/models';
 import { AppError } from '../utils/error';
 import { prisma } from '../utils/prisma';
-import { createTenant } from './tenant.service';
 import bcrypt from 'bcrypt';
-import jwt, { type JwtPayload } from 'jsonwebtoken';
+import jwt, {
+  type JwtPayload,
+  type Secret,
+  type SignOptions,
+} from 'jsonwebtoken';
 import type { RoleEnum, User } from '../generated/prisma/client';
-import { NextFunction, Request, Response } from 'express';
-
-type NewUserData = Omit<UserCreateInput, 'tenant' | 'password_hash'> & {
-  password: string;
-};
+import type { NextFunction, Request, Response } from 'express';
+import ms, { type StringValue } from 'ms';
 
 async function hash(arg: string) {
   const result = await bcrypt.hash(arg, 10);
@@ -25,27 +22,31 @@ async function compare(arg: string, enc: string) {
   return result;
 }
 
-async function issueJwt(user: User) {
-  const { id, role, is_guest, tenant_id } = user;
-  const expiresIn = '1d';
+function issueJwt(user: User, duration?: number) {
+  const { id } = user;
+  const expiresIn = duration ? ms(duration) : '1d';
 
   const payload: JwtPayload = {
     sub: id,
-    iat: Date.now(),
+    iat: Math.floor(Date.now() / 1000),
   };
 
-  const token = jwt.sign(payload, process.env.JWT_SECRET as string, {
-    expiresIn,
-    algorithm: 'HS256',
-  });
+  const token = jwt.sign(
+    payload,
+    process.env.JWT_SECRET as Secret,
+    {
+      expiresIn,
+      algorithm: 'HS256',
+    } as SignOptions,
+  );
 
   return {
     token: 'Bearer ' + token,
-    expires: expiresIn,
+    expires: ms(expiresIn as StringValue),
   };
 }
 
-async function requireRole(role: RoleEnum) {
+function requireRole(role: RoleEnum) {
   return (req: Request, res: Response, next: NextFunction) => {
     if ((req.user as User).role !== role) {
       throw new AppError({
@@ -54,14 +55,14 @@ async function requireRole(role: RoleEnum) {
         message: 'Unauthorized',
       });
     }
+    next();
   };
 }
 
-async function createUser(userData: NewUserData, tenantId: string) {
+async function createUser(data: UserCreateInput) {
   const existingUser = await prisma.user.findFirst({
-    where: { email: userData.email },
+    where: { email: data.email },
   });
-
   prisma.$disconnect();
 
   if (!existingUser === null) {
@@ -72,15 +73,7 @@ async function createUser(userData: NewUserData, tenantId: string) {
     });
   }
 
-  const passwordHash = await hash(userData.password);
-  const newUser = await prisma.user.create({
-    data: {
-      ...userData,
-      password_hash: passwordHash,
-      tenant: { connect: { id: tenantId } },
-    },
-  });
-
+  const newUser = await prisma.user.create({ data });
   prisma.$disconnect();
   return newUser;
 }
@@ -97,20 +90,11 @@ async function getUserByEmail(email: string) {
   return user;
 }
 
-async function createOrganization(
-  tenantData: TenantCreateInput,
-  userData: NewUserData,
-) {
-  const tenant = await createTenant(tenantData);
-  const user = await createUser({ ...userData, role: 'ADMIN' }, tenant.id);
-  return { tenant, user };
-}
-
 export {
-  createOrganization,
   createUser,
   getUserById,
   getUserByEmail,
+  hash,
   compare,
   issueJwt,
   requireRole,
