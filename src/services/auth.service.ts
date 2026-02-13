@@ -6,11 +6,15 @@ import type {
 import { AppError } from '../utils/error';
 import { prisma } from '../utils/prisma';
 import { createTenant } from './tenant.service';
-import bcrypt from 'bcrypt';
+import { hash } from '../utils/bcrypt';
 
-async function createUser(data: UserCreateInput) {
+type NewUserData = Omit<UserCreateInput, 'tenant' | 'password_hash'> & {
+  password: string;
+};
+
+async function createUser(userData: NewUserData, tenantId: string) {
   const existingUser = await prisma.user.findFirst({
-    where: { email: data.email },
+    where: { email: userData.email },
   });
 
   if (!existingUser === null) {
@@ -21,7 +25,14 @@ async function createUser(data: UserCreateInput) {
     });
   }
 
-  const newUser = await prisma.user.create({ data });
+  const passwordHash = await hash(userData.password);
+  const newUser = await prisma.user.create({
+    data: {
+      ...userData,
+      password_hash: passwordHash,
+      tenant: { connect: { id: tenantId } },
+    },
+  });
   return newUser;
 }
 
@@ -41,20 +52,11 @@ async function getUserById(id: string) {
 
 async function createOrganization(
   tenantData: TenantCreateInput,
-  userData: Omit<UserCreateInput, 'tenant' | 'password_hash'> & {
-    password: string;
-  },
+  userData: NewUserData,
 ) {
   const tenant = await createTenant(tenantData);
-
-  // Create user
-  const passwordHash = await bcrypt.hash(userData.password, 10);
-  const user = await createUser({
-    ...userData,
-    role: 'ADMIN',
-    password_hash: passwordHash,
-    tenant: { connect: { id: tenant.id } },
-  });
+  const user = await createUser({ ...userData, role: 'ADMIN' }, tenant.id);
+  return { tenant, user };
 }
 
-export { createOrganization };
+export { createOrganization, createUser, getUserById };
