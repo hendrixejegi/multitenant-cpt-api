@@ -4,6 +4,7 @@ import errorHandler from './middlewares/error.middleware';
 import initializePassport from './config/passport';
 import passport from 'passport';
 import type { ApiResponse } from './types/api';
+import attemptRoute from './routers/attempt.router';
 
 initializePassport(passport);
 
