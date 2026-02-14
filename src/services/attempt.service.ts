@@ -1,8 +1,7 @@
 import type { AttemptCreateInput } from '../generated/prisma/models';
-import { AppError, handlePrismaError } from '../utils/error';
+import { handlePrismaError, NotFoundError } from '../utils/error';
 import { prisma } from '../utils/prisma';
 import { StatusEnum } from '../generated/prisma/enums';
-import { ReasonPhrases, StatusCodes } from 'http-status-codes';
 
 async function createAttempt(data: AttemptCreateInput) {
   const attempt = await prisma.attempt.create({ data });
@@ -21,11 +20,7 @@ async function incrementCorrectAnswers(attemptId: string) {
   prisma.$disconnect();
 
   if (attempt === null) {
-    throw new AppError({
-      status: StatusCodes.NOT_FOUND,
-      reason: ReasonPhrases.NOT_FOUND,
-      message: `Attempt with id: ${id} does not exist`,
-    });
+    throw new NotFoundError(`Attempt with id: ${attemptId} does not exist`);
   }
 
   attempt.correct_answers += 1;
@@ -50,11 +45,7 @@ async function incrementWrongAnswers(attemptId: string) {
   prisma.$disconnect();
 
   if (attempt === null) {
-    throw new AppError({
-      status: 400,
-      code: 'not_found',
-      message: 'No attempt found',
-    });
+    throw new NotFoundError(`Attempt with id: ${attemptId} does not exist`);
   }
 
   attempt.wrong_answers += 1;
@@ -100,11 +91,7 @@ async function calculateAttemptScore(attemptId: string) {
   prisma.$disconnect();
 
   if (attempt === null) {
-    throw new AppError({
-      status: 400,
-      code: 'not_found',
-      message: 'No attempt found',
-    });
+    throw new NotFoundError(`Attempt with id: ${attemptId} does not exist`);
   }
 
   const { correct_answers = 0, wrong_answers = 0 } = attempt;

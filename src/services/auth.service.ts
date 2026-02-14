@@ -1,6 +1,5 @@
-import { ReasonPhrases, StatusCodes } from 'http-status-codes';
 import type { UserCreateInput } from '../generated/prisma/models';
-import { AppError } from '../utils/error';
+import { BadRequestError, UnauthorizedError } from '../utils/error';
 import { prisma } from '../utils/prisma';
 import bcrypt from 'bcrypt';
 import jwt, {
@@ -49,11 +48,7 @@ function issueJwt(user: User, duration?: number) {
 function requireRole(role: RoleEnum) {
   return (req: Request, res: Response, next: NextFunction) => {
     if ((req.user as User).role !== role) {
-      throw new AppError({
-        status: StatusCodes.UNAUTHORIZED,
-        reason: ReasonPhrases.UNAUTHORIZED,
-        message: 'Unauthorized',
-      });
+      throw new UnauthorizedError();
     }
     next();
   };
@@ -66,11 +61,7 @@ async function createUser(data: UserCreateInput) {
   prisma.$disconnect();
 
   if (!existingUser === null) {
-    throw new AppError({
-      status: StatusCodes.BAD_REQUEST,
-      reason: ReasonPhrases.BAD_REQUEST,
-      message: 'User with email already exists',
-    });
+    throw new BadRequestError('User with email already exists');
   }
 
   const newUser = await prisma.user.create({ data });
