@@ -1,5 +1,5 @@
 import type { UserCreateInput } from '../generated/prisma/models';
-import { BadRequestError, UnauthorizedError } from '../utils/error';
+import { BadRequestError } from '../utils/error';
 import { prisma } from '../utils/prisma';
 import bcrypt from 'bcrypt';
 import jwt, {
@@ -7,8 +7,7 @@ import jwt, {
   type Secret,
   type SignOptions,
 } from 'jsonwebtoken';
-import type { RoleEnum, User } from '../generated/prisma/client';
-import type { NextFunction, Request, Response } from 'express';
+import type { User } from '../generated/prisma/client';
 import ms, { type StringValue } from 'ms';
 
 async function hash(arg: string) {
@@ -45,15 +44,6 @@ function issueJwt(user: User, duration?: number) {
   };
 }
 
-function requireRole(role: RoleEnum) {
-  return (req: Request, res: Response, next: NextFunction) => {
-    if ((req.user as User).role !== role) {
-      throw new UnauthorizedError();
-    }
-    next();
-  };
-}
-
 async function createUser(data: UserCreateInput) {
   const existingUser = await prisma.user.findFirst({
     where: { email: data.email },
@@ -81,12 +71,4 @@ async function getUserByEmail(email: string) {
   return user;
 }
 
-export {
-  createUser,
-  getUserById,
-  getUserByEmail,
-  hash,
-  compare,
-  issueJwt,
-  requireRole,
-};
+export { createUser, getUserById, getUserByEmail, hash, compare, issueJwt };
