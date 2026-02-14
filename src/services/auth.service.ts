@@ -48,26 +48,22 @@ async function createUser(data: UserCreateInput) {
   const existingUser = await prisma.user.findFirst({
     where: { email: data.email },
   });
-  prisma.$disconnect();
 
-  if (!existingUser === null) {
+  if (existingUser !== null) {
     throw new BadRequestError('User with email already exists');
   }
 
   const newUser = await prisma.user.create({ data });
-  prisma.$disconnect();
   return newUser;
 }
 
 async function getUserById(id: string) {
   const user = await prisma.user.findUnique({ where: { id } });
-  prisma.$disconnect();
   return user;
 }
 
 async function getUserByEmail(email: string) {
   const user = await prisma.user.findFirst({ where: { email } });
-  prisma.$disconnect();
   return user;
 }
 

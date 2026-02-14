@@ -5,19 +5,16 @@ import { StatusEnum } from '../generated/prisma/enums';
 
 async function createAttempt(data: AttemptCreateInput) {
   const attempt = await prisma.attempt.create({ data });
-  prisma.$disconnect();
   return attempt;
 }
 
 async function getAttemptById(id: string) {
   const attempt = await prisma.attempt.findUnique({ where: { id } });
-  prisma.$disconnect();
   return attempt;
 }
 
 async function incrementCorrectAnswers(attemptId: string) {
   const attempt = await getAttemptById(attemptId);
-  prisma.$disconnect();
 
   if (attempt === null) {
     throw new NotFoundError(`Attempt with id: ${attemptId} does not exist`);
@@ -33,8 +30,6 @@ async function incrementCorrectAnswers(attemptId: string) {
   } catch (error) {
     handlePrismaError(error, `Failed to update attempt with id: ${attemptId}`);
     throw error;
-  } finally {
-    prisma.$disconnect();
   }
 
   return attempt.correct_answers;
@@ -42,7 +37,6 @@ async function incrementCorrectAnswers(attemptId: string) {
 
 async function incrementWrongAnswers(attemptId: string) {
   const attempt = await getAttemptById(attemptId);
-  prisma.$disconnect();
 
   if (attempt === null) {
     throw new NotFoundError(`Attempt with id: ${attemptId} does not exist`);
@@ -58,8 +52,6 @@ async function incrementWrongAnswers(attemptId: string) {
   } catch (error) {
     handlePrismaError(error, `Failed to update attempt with id: ${attemptId}`);
     throw error;
-  } finally {
-    prisma.$disconnect();
   }
 
   return attempt.wrong_answers;
@@ -79,8 +71,6 @@ async function updateAttemptStatus(attemptId: string, status: StatusEnum) {
   } catch (error) {
     handlePrismaError(error, `Failed to update attempt with id: ${attemptId}`);
     throw error;
-  } finally {
-    prisma.$disconnect();
   }
 
   return status;
@@ -88,7 +78,6 @@ async function updateAttemptStatus(attemptId: string, status: StatusEnum) {
 
 async function calculateAttemptScore(attemptId: string) {
   const attempt = await getAttemptById(attemptId);
-  prisma.$disconnect();
 
   if (attempt === null) {
     throw new NotFoundError(`Attempt with id: ${attemptId} does not exist`);
@@ -105,8 +94,6 @@ async function calculateAttemptScore(attemptId: string) {
   } catch (error) {
     handlePrismaError(error, `Failed to update attempt with id: ${attemptId}`);
     throw error;
-  } finally {
-    prisma.$disconnect();
   }
 
   return score;
