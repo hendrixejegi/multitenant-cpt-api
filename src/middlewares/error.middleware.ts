@@ -1,6 +1,7 @@
 import type { Request, Response, NextFunction } from 'express';
-import config from '../config';
+import config from '../config/config';
 import { AppError, errorToPlain, getErrorMessage } from '../utils/error';
+import type { ApiResponse } from '../types/api';
 
 export default function errorHandler(
   err: any,

@@ -1,13 +1,13 @@
-interface ApiSuccess {
+export interface ApiSuccess {
   type: 'success';
   message?: string;
   data?: unknown;
 }
 
-interface ApiError {
+export interface ApiError {
   type: 'error';
   message: string;
   data?: unknown;
 }
 
-type ApiResponse = ApiError | ApiSuccess;
+export type ApiResponse = ApiError | ApiSuccess;

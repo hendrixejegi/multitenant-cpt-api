@@ -1,18 +1,20 @@
-import config from './config';
+import config from './config/config';
 import express, { type Request, type Response } from 'express';
 import errorHandler from './middlewares/error.middleware';
-import { AppError } from './utils/error';
+import initializePassport from './config/passport';
+import passport from 'passport';
+import type { ApiResponse } from './types/api';
+import attemptRoute from './routers/attempt.router';
+
+initializePassport(passport);
 
 const app = express();
 
-app.get('/', (req: Request, res: Response) => {
-  res.status(200).send(`<h1>Welcome</h1>`);
+app.use(express.json());
+app.use(passport.initialize());
 
-  // throw new AppError({
-  //   status: 400,
-  //   message: 'just bad',
-  //   code: 'bad_request',
-  // });
+app.get('/health', (req: Request, res: Response<ApiResponse>) => {
+  res.status(200).json({ type: 'success', message: 'Server is healthy' });
 });
 
 app.use(errorHandler);
