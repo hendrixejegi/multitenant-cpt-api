@@ -3,6 +3,7 @@ import express, { type Request, type Response } from 'express';
 import errorHandler from './middlewares/error.middleware';
 import initializePassport from './config/passport';
 import passport from 'passport';
+import type { ApiResponse } from './types/api';
 
 initializePassport(passport);
 

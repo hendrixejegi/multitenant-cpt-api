@@ -152,6 +152,7 @@ function handlePrismaError(err: any, message: string) {
 }
 
 export {
+  AppError,
   getErrorMessage,
   errorToPlain,
   handlePrismaError,
