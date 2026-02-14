@@ -7,6 +7,7 @@ import { prisma } from '../utils/prisma';
 import { RoleEnum } from '../generated/prisma/enums';
 import { ReasonPhrases, StatusCodes } from 'http-status-codes';
 import { createExamCode, getTenantId } from '../utils/helpers';
+import { ExamAggregateResultSchema } from '../generated/schemas';
 
 const createExam = async (data: ExamCreateInput, tenantId: string) => {
   try {
@@ -19,8 +20,9 @@ const createExam = async (data: ExamCreateInput, tenantId: string) => {
     }
     const exam = await prisma.exam.create({
       data: {
-        ...data,
+        ...(data as ExamCreateInput),
         code: createExamCode(),
+        is_published: false,
         tenant: {
           connect: {
             id: tenantId,
@@ -137,7 +139,7 @@ const updateExam = async (
         id: examId,
         tenant_id: tenantId,
       },
-      data: data,
+      data: data as ExamUpdateInput,
     });
     return;
   } catch (error) {
