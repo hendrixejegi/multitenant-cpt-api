@@ -1,17 +1,21 @@
-import jwt from 'jsonwebtoken';
-import { JwtPayload } from '../types';
+import jwt, { SignOptions, Secret } from "jsonwebtoken";
+import { JwtPayload } from "../types";
 
-const JWT_SECRET = process.env.JWT_SECRET || 'fallback-secret-change-in-production';
-const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '7d';
+const JWT_SECRET: Secret = (process.env.JWT_SECRET ||
+  "fallback-secret-change-in-production") as Secret;
+const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || "7d";
 
 /**
  * Generate a JWT token for authenticated user
  */
 export const generateToken = (payload: JwtPayload): string => {
-  return jwt.sign(payload, JWT_SECRET, {
+  const options: SignOptions = {
     expiresIn: JWT_EXPIRES_IN,
-    issuer: 'cbt-auth-system'
-  });
+    issuer: "cbt-auth-system",
+  } as SignOptions;
+
+  // `payload` conforms to an object shape; cast to `object` to satisfy overloads
+  return jwt.sign(payload as object, JWT_SECRET, options);
 };
 
 /**
@@ -23,12 +27,12 @@ export const verifyToken = (token: string): JwtPayload => {
     return decoded;
   } catch (error) {
     if (error instanceof jwt.TokenExpiredError) {
-      throw new Error('Token has expired');
+      throw new Error("Token has expired");
     }
     if (error instanceof jwt.JsonWebTokenError) {
-      throw new Error('Invalid token');
+      throw new Error("Invalid token");
     }
-    throw new Error('Token verification failed');
+    throw new Error("Token verification failed");
   }
 };
 
