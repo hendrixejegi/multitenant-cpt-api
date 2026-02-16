@@ -4,7 +4,7 @@ import errorHandler from './middlewares/error.middleware';
 import initializePassport from './config/passport';
 import passport from 'passport';
 import type { ApiResponse } from './types/api';
-import authRoute from './routers/auth.router';
+import attemptRoute from './routers/attempt.router';
 
 initializePassport(passport);
 
@@ -16,8 +16,6 @@ app.use(passport.initialize());
 app.get('/health', (req: Request, res: Response<ApiResponse>) => {
   res.status(200).json({ type: 'success', message: 'Server is healthy' });
 });
-
-app.use('/auth', authRoute);
 
 app.use(errorHandler);
 
