@@ -100,7 +100,7 @@ const updateExam = async (
   }
 };
 
-const getExamByCode = async (code: string) => {
+const getExamByCode = async (code: string, userId: string, examId: string) => {
   try {
     if (!code) {
       throw new AppError({
@@ -109,10 +109,26 @@ const getExamByCode = async (code: string) => {
         message: 'Exam code is required',
       });
     }
+
+    const exam = await prisma.exam.findUnique({
+      where: {
+        id: examId,
+        code,
+      },
+      include: {
+        questions: {
+          omit: {
+            correct_answer: true,
+          },
+        },
+      },
+    });
+
+    return exam;
   } catch (error) {
     handlePrismaError(error, 'Failed to fetch exam by code');
     throw error;
   }
 };
 
-export { createExam, getAllExams, deleteExam, updateExam };
+export { createExam, getAllExams, deleteExam, updateExam, getExamByCode };
