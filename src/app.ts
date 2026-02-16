@@ -6,6 +6,8 @@ import passport from 'passport';
 import type { ApiResponse } from './types/api';
 import { prisma } from './utils/prisma';
 import router from './router';
+import swaggerUi from 'swagger-ui-express';
+import { swaggerApiOptions } from './config/swagger';
 
 initializePassport(passport);
 
@@ -18,6 +20,7 @@ app.get('/api/health', (req: Request, res: Response<ApiResponse>) => {
   res.status(200).json({ type: 'success', message: 'Server is healthy' });
 });
 app.use('/api', router);
+app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerApiOptions));
 
 app.use(errorHandler);
 
