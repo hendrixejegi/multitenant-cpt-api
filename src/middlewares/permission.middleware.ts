@@ -1,20 +1,12 @@
 import { UnauthorizedError } from '../utils/error';
+import type { RoleEnum, User } from '../generated/prisma/client';
 import type { NextFunction, Request, Response } from 'express';
 
-function requireRole(role: string) {
+function requireRole(role: RoleEnum) {
   return (req: Request, res: Response, next: NextFunction) => {
-    if (!req.user) {
-      throw new UnauthorizedError('Authentication required');
+    if ((req.user as User).role !== role) {
+      throw new UnauthorizedError();
     }
-
-    const currentRole = String(
-      (req.user as { role?: string | null }).role ?? '',
-    ).toLowerCase();
-
-    if (currentRole !== role.toLowerCase()) {
-      throw new UnauthorizedError('Insufficient permissions');
-    }
-
     next();
   };
 }
