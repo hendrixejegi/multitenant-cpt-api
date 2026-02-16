@@ -7,9 +7,10 @@ import type { ApiResponse } from './types/api';
 import { prisma } from './utils/prisma';
 import router from './router';
 import swaggerUi from 'swagger-ui-express';
-import { swaggerApiOptions } from './config/swagger';
+import YAML from 'yamljs';
 
 initializePassport(passport);
+const swaggerDocument = YAML.load('./src/openapi.yaml');
 
 const app = express();
 
@@ -20,7 +21,7 @@ app.get('/api/health', (req: Request, res: Response<ApiResponse>) => {
   res.status(200).json({ type: 'success', message: 'Server is healthy' });
 });
 app.use('/api', router);
-app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerApiOptions));
+app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 app.use(errorHandler);
 
