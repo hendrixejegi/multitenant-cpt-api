@@ -4,8 +4,8 @@ import errorHandler from './middlewares/error.middleware';
 import initializePassport from './config/passport';
 import passport from 'passport';
 import type { ApiResponse } from './types/api';
-import attemptRoute from './routers/attempt.router';
 import { prisma } from './utils/prisma';
+import router from './router';
 
 initializePassport(passport);
 
@@ -19,6 +19,7 @@ app.get('/health', (req: Request, res: Response<ApiResponse>) => {
 });
 
 app.use(errorHandler);
+app.use('/api', router);
 
 app.listen(config.port, () => {
   console.log(`server listening on port ${config.port}`);
