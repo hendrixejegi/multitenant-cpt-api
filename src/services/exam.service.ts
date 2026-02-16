@@ -100,4 +100,19 @@ const updateExam = async (
   }
 };
 
+const getExamByCode = async (code: string) => {
+  try {
+    if (!code) {
+      throw new AppError({
+        status: StatusCodes.BAD_REQUEST,
+        reason: ReasonPhrases.BAD_REQUEST,
+        message: 'Exam code is required',
+      });
+    }
+  } catch (error) {
+    handlePrismaError(error, 'Failed to fetch exam by code');
+    throw error;
+  }
+};
+
 export { createExam, getAllExams, deleteExam, updateExam };
