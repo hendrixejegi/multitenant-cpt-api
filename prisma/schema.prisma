@@ -18,11 +18,6 @@ datasource db {
   provider = "postgresql"
 }
 
-enum RoleEnum {
-  ADMIN
-  STUDENT
-}
-
 enum StatusEnum {
   IN_PROGRESS
   SUBMITTED
@@ -31,28 +26,31 @@ enum StatusEnum {
 
 // Represents a school, company, or institution using the platform
 model Tenant {
-  id         String   @id @default(uuid())
-  name       String
-  slug       String
-  created_at DateTime @default(now())
+  id                String   @id @default(uuid()) @db.Uuid
+  organization_name String   @unique @db.VarChar(255)
+  created_at        DateTime @default(now())
+  updated_at        DateTime @default(now())
 
   users User[]
   exams Exam[]
+
+  @@map("tenants")
 }
 
 // Represents both administrators and students
 model User {
-  id            String   @id @default(uuid())
-  tenant_id     String
-  name          String
-  email         String?
-  password_hash String?
-  role          RoleEnum
-  is_guest      Boolean
+  id            String   @id @default(uuid()) @db.Uuid
+  tenant_id     String   @db.Uuid
+  email         String   @db.VarChar(255)
+  password_hash String   @db.VarChar(255)
+  role          String?  @default("admin") @db.VarChar(50)
   created_at    DateTime @default(now())
+  updated_at    DateTime @default(now())
 
   attempts Attempt[]
-  tenant   Tenant    @relation(fields: [tenant_id], references: [id])
+  tenant   Tenant    @relation(fields: [tenant_id], references: [id], onDelete: Restrict, onUpdate: Cascade)
+
+  @@map("users")
 }
 
 // Represents an assessment created by an organization

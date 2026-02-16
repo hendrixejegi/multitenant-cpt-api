@@ -2,67 +2,59 @@ import type { AttemptCreateInput } from '../generated/prisma/models';
 import { handlePrismaError, NotFoundError } from '../utils/error';
 import { prisma } from '../utils/prisma';
 import { StatusEnum } from '../generated/prisma/enums';
+import { Prisma } from '../generated/prisma/client';
+
+function isPrismaRecordNotFound(error: unknown): boolean {
+  return (
+    error instanceof Prisma.PrismaClientKnownRequestError &&
+    error.code === 'P2025'
+  );
+}
 
 async function createAttempt(data: AttemptCreateInput) {
-  const attempt = await prisma.attempt.create({ data });
-  prisma.$disconnect();
-  return attempt;
+  return prisma.attempt.create({ data });
 }
 
 async function getAttemptById(id: string) {
-  const attempt = await prisma.attempt.findUnique({ where: { id } });
-  prisma.$disconnect();
-  return attempt;
+  return prisma.attempt.findUnique({ where: { id } });
 }
 
 async function incrementCorrectAnswers(attemptId: string) {
-  const attempt = await getAttemptById(attemptId);
-  prisma.$disconnect();
-
-  if (attempt === null) {
-    throw new NotFoundError(`Attempt with id: ${attemptId} does not exist`);
-  }
-
-  attempt.correct_answers += 1;
-
   try {
-    await prisma.attempt.update({
+    const updatedAttempt = await prisma.attempt.update({
       where: { id: attemptId },
-      data: { correct_answers: attempt.correct_answers },
+      data: { correct_answers: { increment: 1 } },
+      select: { correct_answers: true },
     });
+
+    return updatedAttempt.correct_answers;
   } catch (error) {
+    if (isPrismaRecordNotFound(error)) {
+      throw new NotFoundError(`Attempt with id: ${attemptId} does not exist`);
+    }
+
     handlePrismaError(error, `Failed to update attempt with id: ${attemptId}`);
     throw error;
-  } finally {
-    prisma.$disconnect();
   }
-
-  return attempt.correct_answers;
 }
 
 async function incrementWrongAnswers(attemptId: string) {
-  const attempt = await getAttemptById(attemptId);
-  prisma.$disconnect();
-
-  if (attempt === null) {
-    throw new NotFoundError(`Attempt with id: ${attemptId} does not exist`);
-  }
-
-  attempt.wrong_answers += 1;
-
   try {
-    await prisma.attempt.update({
+    const updatedAttempt = await prisma.attempt.update({
       where: { id: attemptId },
-      data: { wrong_answers: attempt.wrong_answers },
+      data: { wrong_answers: { increment: 1 } },
+      select: { wrong_answers: true },
     });
+
+    return updatedAttempt.wrong_answers;
   } catch (error) {
+    if (isPrismaRecordNotFound(error)) {
+      throw new NotFoundError(`Attempt with id: ${attemptId} does not exist`);
+    }
+
     handlePrismaError(error, `Failed to update attempt with id: ${attemptId}`);
     throw error;
-  } finally {
-    prisma.$disconnect();
   }
-
-  return attempt.wrong_answers;
 }
 
 async function updateAttemptStatus(attemptId: string, status: StatusEnum) {
@@ -77,10 +69,12 @@ async function updateAttemptStatus(attemptId: string, status: StatusEnum) {
       },
     });
   } catch (error) {
+    if (isPrismaRecordNotFound(error)) {
+      throw new NotFoundError(`Attempt with id: ${attemptId} does not exist`);
+    }
+
     handlePrismaError(error, `Failed to update attempt with id: ${attemptId}`);
     throw error;
-  } finally {
-    prisma.$disconnect();
   }
 
   return status;
@@ -88,7 +82,6 @@ async function updateAttemptStatus(attemptId: string, status: StatusEnum) {
 
 async function calculateAttemptScore(attemptId: string) {
   const attempt = await getAttemptById(attemptId);
-  prisma.$disconnect();
 
   if (attempt === null) {
     throw new NotFoundError(`Attempt with id: ${attemptId} does not exist`);
@@ -103,10 +96,12 @@ async function calculateAttemptScore(attemptId: string) {
   try {
     await prisma.attempt.update({ where: { id: attemptId }, data: { score } });
   } catch (error) {
+    if (isPrismaRecordNotFound(error)) {
+      throw new NotFoundError(`Attempt with id: ${attemptId} does not exist`);
+    }
+
     handlePrismaError(error, `Failed to update attempt with id: ${attemptId}`);
     throw error;
-  } finally {
-    prisma.$disconnect();
   }
 
   return score;
