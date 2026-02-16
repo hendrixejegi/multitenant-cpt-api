@@ -6,6 +6,7 @@ import passport from 'passport';
 import type { ApiResponse } from './types/api';
 import { prisma } from './utils/prisma';
 import router from './router';
+import authRoute from './routers/auth.router';
 
 initializePassport(passport);
 
@@ -17,6 +18,8 @@ app.use(passport.initialize());
 app.get('/health', (req: Request, res: Response<ApiResponse>) => {
   res.status(200).json({ type: 'success', message: 'Server is healthy' });
 });
+
+app.use('/auth', authRoute);
 
 app.use(errorHandler);
 app.use('/api', router);

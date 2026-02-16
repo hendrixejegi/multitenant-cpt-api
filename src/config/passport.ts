@@ -5,7 +5,7 @@ import {
   type StrategyOptionsWithSecret,
   type VerifyCallback,
 } from 'passport-jwt';
-import { getUserById } from '../services/auth.service';
+import { getUserById, type AuthJwtPayload } from '../services/auth.service';
 
 function initialize(passport: PassportStatic) {
   const opt: StrategyOptionsWithSecret & {
@@ -16,17 +16,27 @@ function initialize(passport: PassportStatic) {
     algorithms: ['HS256'],
   };
 
-  const verify: VerifyCallback = async (payload: { sub: string }, done) => {
+  const verify: VerifyCallback = async (
+    payload: Partial<AuthJwtPayload>,
+    done,
+  ) => {
     try {
-      const user = await getUserById(payload.sub);
+      // We accept either `sub` or `user_id` to stay resilient to token format changes.
+      const userId = payload.sub ?? payload.user_id;
 
-      if (user === null) {
-        done(null, false);
+      if (!userId) {
+        return done(null, false);
       }
 
-      done(null, user);
+      const user = await getUserById(userId);
+
+      if (user === null) {
+        return done(null, false);
+      }
+
+      return done(null, user);
     } catch (error) {
-      done(error, null);
+      return done(error, null);
     }
   };
 
