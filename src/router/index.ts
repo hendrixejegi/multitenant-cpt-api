@@ -1,9 +1,14 @@
 import { Router } from 'express';
 import examRouter from './exam.router';
+import authRouter from './auth.router';
 
 const router = Router();
 
 const defaultRoutes = [
+  {
+    path: '/auth',
+    route: authRouter,
+  },
   {
     path: '/exams',
     route: examRouter,
