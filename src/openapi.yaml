@@ -1,0 +1,276 @@
+openapi: 3.0.0
+info:
+  title: Multi-tenant CBT
+  version: 1.0.0
+servers:
+  - url: http://{{baseurl}}
+tags:
+  - name: Attempt
+  - name: Exam
+  - name: Authentication
+  - name: Tenant
+paths:
+  /auth/register:
+    post:
+      tags:
+        - Authentication
+      summary: Register
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                name: Hendrix
+                email: testuser@mail.com
+                password: password
+                organization_name: altschool
+                organization_slug: altschool
+      responses:
+        '200':
+          description: OK
+          headers:
+            X-Powered-By:
+              schema:
+                type: string
+                example: Express
+            Content-Type:
+              schema:
+                type: string
+                example: application/json; charset=utf-8
+            Content-Length:
+              schema:
+                type: integer
+                example: '417'
+            ETag:
+              schema:
+                type: string
+                example: W/"1a1-q2kTGq8j6pfd2Gv9P+uSInb0UqM"
+            Date:
+              schema:
+                type: string
+                example: Mon, 16 Feb 2026 15:29:29 GMT
+            Connection:
+              schema:
+                type: string
+                example: keep-alive
+            Keep-Alive:
+              schema:
+                type: string
+                example: timeout=5
+          content:
+            text/plain:
+              schema:
+                type: string
+              example: |-
+                {
+                    "type": "success",
+                    "message": "Registration successful",
+                    "data": {
+                        "tenant": {
+                            "id": "a353f3d2-b36d-417d-a6e3-797a1dd01d25",
+                            "name": "altschool",
+                            "slug": "altschool",
+                            "created_at": "2026-02-16T15:29:26.354Z"
+                        },
+                        "user": {
+                            "id": "61c71134-3bd9-4328-b7c4-14f4636b35df",
+                            "tenant_id": "a353f3d2-b36d-417d-a6e3-797a1dd01d25",
+                            "name": "Hendrix",
+                            "email": "testuser@mail.com",
+                            "role": "ADMIN",
+                            "is_guest": false,
+                            "created_at": "2026-02-16T15:29:27.810Z"
+                        }
+                    }
+                }
+  /auth/login:
+    post:
+      tags:
+        - Authentication
+      summary: Login
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                email: testuser@mail.com
+                password: password
+      responses:
+        '200':
+          description: OK
+          headers:
+            X-Powered-By:
+              schema:
+                type: string
+                example: Express
+            Content-Type:
+              schema:
+                type: string
+                example: application/json; charset=utf-8
+            Content-Length:
+              schema:
+                type: integer
+                example: '267'
+            ETag:
+              schema:
+                type: string
+                example: W/"10b-XNTZKM2FJ9CY8wiZdT2ifule67o"
+            Date:
+              schema:
+                type: string
+                example: Mon, 16 Feb 2026 16:49:55 GMT
+            Connection:
+              schema:
+                type: string
+                example: keep-alive
+            Keep-Alive:
+              schema:
+                type: string
+                example: timeout=5
+          content:
+            text/plain:
+              schema:
+                type: string
+              example: |-
+                {
+                    "type": "success",
+                    "message": "OK",
+                    "data": {
+                        "token": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2MWM3MTEzNC0zYmQ5LTQzMjgtYjdjNC0xNGY0NjM2YjM1ZGYiLCJpYXQiOjE3NzEyNjA1OTUsImV4cCI6MTc3MTM0Njk5NX0.WVWQ2dfW1D2V5KgE82gEek7OjCvqSlX9JfT2DLqM1DU",
+                        "expires": 86400000
+                    }
+                }
+  /auth/me:
+    get:
+      tags:
+        - Authentication
+      summary: Me
+      parameters:
+        - name: Authorization
+          in: header
+          schema:
+            type: string
+          example: >-
+            Bearer
+            eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2MWM3MTEzNC0zYmQ5LTQzMjgtYjdjNC0xNGY0NjM2YjM1ZGYiLCJpYXQiOjE3NzEyNjA1OTUsImV4cCI6MTc3MTM0Njk5NX0.WVWQ2dfW1D2V5KgE82gEek7OjCvqSlX9JfT2DLqM1DU
+      responses:
+        '200':
+          description: OK
+          headers:
+            X-Powered-By:
+              schema:
+                type: string
+                example: Express
+            Content-Type:
+              schema:
+                type: string
+                example: application/json; charset=utf-8
+            Content-Length:
+              schema:
+                type: integer
+                example: '254'
+            ETag:
+              schema:
+                type: string
+                example: W/"fe-0G+6ararKzc1rxA3iJL8CPl+bzQ"
+            Date:
+              schema:
+                type: string
+                example: Mon, 16 Feb 2026 16:56:15 GMT
+            Connection:
+              schema:
+                type: string
+                example: keep-alive
+            Keep-Alive:
+              schema:
+                type: string
+                example: timeout=5
+          content:
+            text/plain:
+              schema:
+                type: string
+              example: |-
+                {
+                    "type": "success",
+                    "message": "OK",
+                    "data": {
+                        "id": "61c71134-3bd9-4328-b7c4-14f4636b35df",
+                        "tenant_id": "a353f3d2-b36d-417d-a6e3-797a1dd01d25",
+                        "name": "Hendrix",
+                        "email": "testuser@mail.com",
+                        "role": "ADMIN",
+                        "is_guest": false,
+                        "created_at": "2026-02-16T15:29:27.810Z"
+                    }
+                }
+  /tenants/me:
+    get:
+      tags:
+        - Tenant
+      summary: Me
+      parameters:
+        - name: Authorization
+          in: header
+          schema:
+            type: string
+          example: >-
+            Bearer
+            eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2MWM3MTEzNC0zYmQ5LTQzMjgtYjdjNC0xNGY0NjM2YjM1ZGYiLCJpYXQiOjE3NzEyNjA1OTUsImV4cCI6MTc3MTM0Njk5NX0.WVWQ2dfW1D2V5KgE82gEek7OjCvqSlX9JfT2DLqM1DU
+      responses:
+        '200':
+          description: OK
+          headers:
+            X-Powered-By:
+              schema:
+                type: string
+                example: Express
+            Content-Type:
+              schema:
+                type: string
+                example: application/json; charset=utf-8
+            Content-Length:
+              schema:
+                type: integer
+                example: '149'
+            ETag:
+              schema:
+                type: string
+                example: W/"95-x+Th+Elt+O/xmrZPMsm/xqCc5t4"
+            Date:
+              schema:
+                type: string
+                example: Mon, 16 Feb 2026 22:50:32 GMT
+            Connection:
+              schema:
+                type: string
+                example: keep-alive
+            Keep-Alive:
+              schema:
+                type: string
+                example: timeout=5
+          content:
+            text/plain:
+              schema:
+                type: string
+              example: |-
+                {
+                    "type": "success",
+                    "data": {
+                        "id": "a353f3d2-b36d-417d-a6e3-797a1dd01d25",
+                        "name": "altschool",
+                        "slug": "altschool",
+                        "created_at": "2026-02-16T15:29:26.354Z"
+                    }
+                }
+  /health:
+    get:
+      tags:
+        - default
+      summary: Health
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
