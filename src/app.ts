@@ -14,11 +14,11 @@ const app = express();
 app.use(express.json());
 app.use(passport.initialize());
 
-app.get('/health', (req: Request, res: Response<ApiResponse>) => {
+app.get('/api/health', (req: Request, res: Response<ApiResponse>) => {
   res.status(200).json({ type: 'success', message: 'Server is healthy' });
 });
-
 app.use('/api', router);
+
 app.use(errorHandler);
 
 app.listen(config.port, () => {

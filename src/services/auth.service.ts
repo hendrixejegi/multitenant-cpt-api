@@ -50,7 +50,7 @@ async function createUser(data: UserCreateInput) {
   });
   prisma.$disconnect();
 
-  if (!existingUser === null) {
+  if (existingUser !== null) {
     throw new BadRequestError('User with email already exists');
   }
 
