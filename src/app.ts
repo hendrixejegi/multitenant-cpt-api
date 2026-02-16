@@ -18,8 +18,8 @@ app.get('/health', (req: Request, res: Response<ApiResponse>) => {
   res.status(200).json({ type: 'success', message: 'Server is healthy' });
 });
 
-app.use(errorHandler);
 app.use('/api', router);
+app.use(errorHandler);
 
 app.listen(config.port, () => {
   console.log(`server listening on port ${config.port}`);
