@@ -62,6 +62,7 @@ model Exam {
   title            String
   description      String
   duration_minutes Int
+  code             String
   is_published     Boolean
   created_at       DateTime @default(now())
 
