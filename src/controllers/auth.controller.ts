@@ -52,7 +52,6 @@ export async function register(req: Request, res: Response<ApiResponse>) {
 
   res.status(StatusCodes.CREATED).json({
     type: 'success',
-    message: 'Registration successful',
     data: { tenant, user },
   });
 }
@@ -75,14 +74,10 @@ export async function login(req: Request, res: Response<ApiResponse>) {
 
   const jwt = issueJwt(user);
 
-  res
-    .status(StatusCodes.OK)
-    .json({ type: 'success', message: ReasonPhrases.OK, data: jwt });
+  res.status(StatusCodes.OK).json({ type: 'success', data: jwt });
 }
 
 export async function getUserInfo(req: Request, res: Response<ApiResponse>) {
   const { password_hash, ...user } = req.user as User;
-  res
-    .status(StatusCodes.OK)
-    .json({ type: 'success', message: ReasonPhrases.OK, data: user });
+  res.status(StatusCodes.OK).json({ type: 'success', data: user });
 }
