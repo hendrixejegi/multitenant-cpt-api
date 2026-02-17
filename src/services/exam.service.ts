@@ -1,14 +1,22 @@
 import type {
   ExamCreateInput,
   ExamUpdateInput,
-} from '../generated/prisma/models';
-import { AppError, handlePrismaError } from '../utils/error';
+} from '../generated/prisma/models.js';
+import {
+  AppError,
+  BadRequestError,
+  handlePrismaError,
+  NotFoundError,
+  UnauthorizedError,
+} from '../utils/error';
 import { prisma } from '../utils/prisma';
 import { ReasonPhrases, StatusCodes } from 'http-status-codes';
 import { createExamCode, getTenantId } from '../utils/helpers';
-import { ExamAggregateResultSchema } from '../generated/schemas';
 
-const createExam = async (data: ExamCreateInput, tenantId: string) => {
+const createExam = async (
+  data: Pick<ExamCreateInput, 'title' | 'description' | 'duration_minutes'>,
+  tenantId: string,
+) => {
   try {
     if (!data) {
       throw new AppError({
@@ -19,7 +27,7 @@ const createExam = async (data: ExamCreateInput, tenantId: string) => {
     }
     const exam = await prisma.exam.create({
       data: {
-        ...(data as ExamCreateInput),
+        ...data,
         code: createExamCode(),
         is_published: false,
         tenant: {
@@ -58,11 +66,40 @@ const getAllExams = async (tenantId: string) => {
   }
 };
 
-const deleteExam = async (examId: string) => {
+const getExamById = async (examId: string, tenantId: string) => {
+  if (!tenantId) {
+    throw new BadRequestError('Tenant ID is required');
+  }
+
+  const exam = await prisma.exam.findUnique({
+    where: {
+      id: examId,
+      tenant_id: tenantId,
+    },
+  });
+
+  return exam;
+};
+
+const deleteExam = async (examId: string, tenantId: string) => {
   try {
+    const exam = await prisma.exam.findUnique({
+      where: { id: examId },
+      select: { tenant_id: true },
+    });
+
+    if (!exam) {
+      throw new NotFoundError('Exam not found');
+    }
+
+    if (exam.tenant_id !== tenantId) {
+      throw new UnauthorizedError('You do not have access to this exam');
+    }
+
     await prisma.exam.delete({
       where: {
         id: examId,
+        tenant_id: tenantId,
       },
     });
   } catch (error) {
@@ -77,13 +114,17 @@ const updateExam = async (
   tenantId: string,
 ) => {
   try {
-    const tenant_id = getTenantId();
-    if (tenantId !== tenant_id) {
-      throw new AppError({
-        status: StatusCodes.UNAUTHORIZED,
-        reason: ReasonPhrases.UNAUTHORIZED,
-        message: 'Unauthorized',
-      });
+    const exam = await prisma.exam.findUnique({
+      where: { id: examId },
+      select: { tenant_id: true },
+    });
+
+    if (!exam) {
+      throw new NotFoundError('Exam not found');
+    }
+
+    if (exam.tenant_id !== tenantId) {
+      throw new UnauthorizedError('You do not have access to this exam');
     }
 
     await prisma.exam.update({
@@ -100,4 +141,73 @@ const updateExam = async (
   }
 };
 
-export { createExam, getAllExams, deleteExam, updateExam };
+const getExamByCode = async (code: string, userId: string, examId: string) => {
+  try {
+    if (!code) {
+      throw new AppError({
+        status: StatusCodes.BAD_REQUEST,
+        reason: ReasonPhrases.BAD_REQUEST,
+        message: 'Exam code is required',
+      });
+    }
+
+    const exam = await prisma.exam.findFirst({
+      where: {
+        id: examId,
+        code,
+      },
+      include: {
+        questions: {
+          omit: {
+            correct_answer: true,
+          },
+        },
+      },
+    });
+
+    return exam;
+  } catch (error) {
+    handlePrismaError(error, 'Failed to fetch exam by code');
+    throw error;
+  }
+};
+
+const updateExamStatus = async (
+  examId: string,
+  tenantId: string,
+  status: boolean,
+) => {
+  const exam = await prisma.exam.findUnique({
+    where: { id: examId },
+    select: { tenant_id: true },
+  });
+
+  if (!exam) {
+    throw new NotFoundError('Exam not found');
+  }
+
+  if (exam.tenant_id !== tenantId) {
+    throw new UnauthorizedError('You do not have access to this exam');
+  }
+
+  await prisma.exam.update({
+    where: {
+      id: examId,
+      tenant_id: tenantId,
+    },
+    data: {
+      is_published: status,
+    },
+  });
+  return;
+};
+
+export {
+  createExam,
+  getAllExams,
+  getExamById,
+  deleteExam,
+  updateExam,
+  updateExamStatus,
+  getExamByCode,
+};

@@ -46,9 +46,7 @@ const getExamQuestionsandOptions = async (
     const isStudent = userRole === RoleEnum.STUDENT;
 
     const examQuestionsandOptions = await prisma.question.findUnique({
-      omit: {
-        correct_answer: true,
-      },
+      omit: isStudent ? { correct_answer: true } : {},
       where: {
         id: examId,
       },
