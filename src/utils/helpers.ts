@@ -3,6 +3,6 @@ export const createExamCode = () => {
   return code;
 };
 
-export const getTenantId = (): string => {
+export const getTenantId = (userId: string): string => {
   return 'tenant_id';
 };
