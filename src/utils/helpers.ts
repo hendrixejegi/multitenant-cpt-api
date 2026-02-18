@@ -3,6 +3,6 @@ export const createExamCode = () => {
   return code;
 };
 
-export const getTenantId = (userId: string): string => {
-  return 'tenant_id';
+export const convertSecToMill = (sec: number) => {
+  return sec * 1000;
 };

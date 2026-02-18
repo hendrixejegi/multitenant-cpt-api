@@ -1,11 +1,7 @@
 import { Router } from 'express';
 import { requireRole } from '../middlewares/permission.middleware';
-import {
-  validateBody,
-  validateParams,
-} from '../middlewares/validation.middleware';
 import { RoleEnum } from '../generated/prisma/enums';
-import { ExamCreateInputObjectZodSchema } from '../generated/schemas';
+import passport from 'passport';
 import {
   createExam,
   getAllExams,
@@ -19,44 +15,49 @@ const router = Router();
 
 router
   .route('/')
+
   .post(
+    passport.authenticate('jwt', { session: false }),
     requireRole(RoleEnum.ADMIN),
-    validateBody(ExamCreateInputObjectZodSchema),
     createExam,
   )
-  .get(requireRole(RoleEnum.ADMIN), getAllExams);
+  .get(
+    passport.authenticate('jwt', { session: false }),
+    requireRole(RoleEnum.ADMIN),
+    getAllExams,
+  );
 
 router
   .route('/:exam_id')
   .get(
+    passport.authenticate('jwt', { session: false }),
     requireRole(RoleEnum.ADMIN),
-    validateParams(ExamCreateInputObjectZodSchema.pick({ id: true })),
     getExamById,
   )
   .put(
+    passport.authenticate('jwt', { session: false }),
     requireRole(RoleEnum.ADMIN),
-    validateParams(ExamCreateInputObjectZodSchema.pick({ id: true })),
     updateExam,
   )
   .delete(
+    passport.authenticate('jwt', { session: false }),
     requireRole(RoleEnum.ADMIN),
-    validateParams(ExamCreateInputObjectZodSchema.pick({ id: true })),
     deleteExam,
   );
 
 router
   .route('/:exam_id/publish')
   .patch(
+    passport.authenticate('jwt', { session: false }),
     requireRole(RoleEnum.ADMIN),
-    validateParams(ExamCreateInputObjectZodSchema.pick({ id: true })),
     updateExamStatus,
   );
 
 router
   .route('/:exam_id/unpublish')
   .patch(
+    passport.authenticate('jwt', { session: false }),
     requireRole(RoleEnum.ADMIN),
-    validateParams(ExamCreateInputObjectZodSchema.pick({ id: true })),
     updateExamStatus,
   );
 export default router;

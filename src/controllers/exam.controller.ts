@@ -1,15 +1,6 @@
-import {
-  AppError,
-  UnauthorizedError,
-  BadRequestError,
-  NotFoundError,
-} from '../utils/error';
-import { RoleEnum, User } from '../generated/prisma/client';
-import {
-  ExamCreateInput,
-  ExamUpdateInput,
-} from '../generated/prisma/models.js';
-import { ReasonPhrases, StatusCodes } from 'http-status-codes';
+import { UnauthorizedError, BadRequestError } from '../utils/error';
+import { User } from '../generated/prisma/client';
+import { StatusCodes } from 'http-status-codes';
 import catchAsync from '../utils/catchAsync';
 import {
   createExam as createExamService,
@@ -18,11 +9,24 @@ import {
   updateExam as updateExamService,
   getExamById as getExamByIdService,
   updateExamStatus as updateExamStatusService,
+  getExamByCode as getExamByCodeService,
 } from '../services/exam.service';
+import { zodParse } from '../utils/zod-parse';
+import { ExamCreateInputObjectZodSchema } from '../generated/schemas';
 
 const createExam = catchAsync(async (req, res, next) => {
   const user = req.user as User;
-  const { title, description, duration_minutes } = req.body as ExamCreateInput;
+  if (!user.tenant_id) {
+    throw new UnauthorizedError('User tenant not found');
+  }
+  const { title, description, duration_minutes } = zodParse(
+    ExamCreateInputObjectZodSchema.pick({
+      title: true,
+      description: true,
+      duration_minutes: true,
+    }),
+    req.body,
+  );
 
   const exam = await createExamService(
     { title, description, duration_minutes },
@@ -38,6 +42,9 @@ const createExam = catchAsync(async (req, res, next) => {
 
 const getAllExams = catchAsync(async (req, res, next) => {
   const user = req.user as User;
+  if (!user.tenant_id) {
+    throw new UnauthorizedError('User tenant not found');
+  }
 
   const exams = await getAllExamsService(user.tenant_id);
 
@@ -50,15 +57,19 @@ const getAllExams = catchAsync(async (req, res, next) => {
 
 const getExamById = catchAsync(async (req, res, next) => {
   const user = req.user as User;
+  if (!user.tenant_id) {
+    throw new UnauthorizedError('User tenant not found');
+  }
 
   if (!req.params.exam_id) {
     throw new BadRequestError('Exam ID is required');
   }
 
-  const exam = await getExamByIdService(
-    req.params.exam_id as string,
-    user.tenant_id,
-  );
+  const { id } = zodParse(ExamCreateInputObjectZodSchema.pick({ id: true }), {
+    id: req.params.exam_id,
+  });
+
+  const exam = await getExamByIdService(id as string, user.tenant_id);
 
   res.status(StatusCodes.OK).json({
     type: 'success',
@@ -69,12 +80,19 @@ const getExamById = catchAsync(async (req, res, next) => {
 
 const deleteExam = catchAsync(async (req, res, next) => {
   const user = req.user as User;
+  if (!user.tenant_id) {
+    throw new UnauthorizedError('User tenant not found');
+  }
 
   if (!req.params.exam_id) {
     throw new BadRequestError('Exam ID is required');
   }
 
-  await deleteExamService(req.params.exam_id as string, user.tenant_id);
+  const { id } = zodParse(ExamCreateInputObjectZodSchema.pick({ id: true }), {
+    id: req.params.exam_id,
+  });
+
+  await deleteExamService(id as string, user.tenant_id);
 
   res.status(StatusCodes.OK).json({
     type: 'success',
@@ -84,15 +102,31 @@ const deleteExam = catchAsync(async (req, res, next) => {
 
 const updateExam = catchAsync(async (req, res, next) => {
   const user = req.user as User;
+  if (!user.tenant_id) {
+    throw new UnauthorizedError('User tenant not found');
+  }
 
   if (!req.params.exam_id) {
     throw new BadRequestError('Exam ID is required');
   }
 
+  const { id } = zodParse(ExamCreateInputObjectZodSchema.pick({ id: true }), {
+    id: req.params.exam_id,
+  });
+
+  const { title, description, duration_minutes } = zodParse(
+    ExamCreateInputObjectZodSchema.pick({
+      title: true,
+      description: true,
+      duration_minutes: true,
+    }),
+    req.body,
+  );
+
   await updateExamService(
-    req.params.exam_id as string,
-    req.body as ExamUpdateInput,
-    user.tenant_id as string,
+    id as string,
+    { title, description, duration_minutes },
+    user.tenant_id,
   );
 
   res.status(StatusCodes.OK).json({
@@ -103,33 +137,31 @@ const updateExam = catchAsync(async (req, res, next) => {
 
 const updateExamStatus = catchAsync(async (req, res, next) => {
   const user = req.user as User;
+  if (!user.tenant_id) {
+    throw new UnauthorizedError('User tenant not found');
+  }
 
   if (!req.params.exam_id) {
     throw new BadRequestError('Exam ID is required');
   }
 
-  const statusType = req.url.split('/')[-1];
+  const statusType = req.url.split('/').pop(); // Get last segment
 
-  if (statusType === 'publish') {
-    await updateExamStatusService(
-      req.params.exam_id as string,
-      user.tenant_id,
-      true,
-    );
-  } else if (statusType === 'unpublish') {
-    await updateExamStatusService(
-      req.params.exam_id as string,
-      user.tenant_id,
-      false,
-    );
+  if (!statusType || !['publish', 'unpublish'].includes(statusType)) {
+    throw new BadRequestError('Invalid status type. Use publish or unpublish');
   }
+
+  const shouldPublish = statusType === 'publish';
+
+  await updateExamStatusService(
+    req.params.exam_id as string,
+    user.tenant_id,
+    shouldPublish,
+  );
 
   res.status(StatusCodes.OK).json({
     type: 'success',
-    message:
-      statusType === 'publish'
-        ? 'Exam published successfully'
-        : 'Exam unpublished successfully',
+    message: `Exam ${shouldPublish ? 'published' : 'unpublished'} successfully`,
   });
 });
 
