@@ -1,7 +1,8 @@
-import { Router } from 'express';
+import { Router, type RouterOptions } from 'express';
 import examRouter from './exam.router';
 import authRouter from './auth.router';
 import questionsRouter from './questions.router';
+import tenantRouter from './tenant.router';
 
 const router = Router();
 
@@ -17,6 +18,10 @@ const defaultRoutes = [
   {
     path: '/exams',
     route: questionsRouter,
+  },
+  {
+    path: '/tenants',
+    route: tenantRouter,
   },
 ];
 
