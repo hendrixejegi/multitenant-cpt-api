@@ -11,7 +11,7 @@ import {
 } from '../utils/error';
 import { prisma } from '../utils/prisma';
 import { ReasonPhrases, StatusCodes } from 'http-status-codes';
-import { createExamCode, getTenantId } from '../utils/helpers';
+import { createExamCode, convertSecToMill } from '../utils/helpers';
 
 const createExam = async (
   data: Pick<ExamCreateInput, 'title' | 'description' | 'duration_minutes'>,
@@ -28,6 +28,7 @@ const createExam = async (
     const exam = await prisma.exam.create({
       data: {
         ...data,
+        duration_minutes: convertSecToMill(data.duration_minutes),
         code: createExamCode(),
         is_published: false,
         tenant: {
@@ -110,7 +111,7 @@ const deleteExam = async (examId: string, tenantId: string) => {
 
 const updateExam = async (
   examId: string,
-  data: ExamUpdateInput,
+  data: Pick<ExamUpdateInput, 'title' | 'description' | 'duration_minutes'>,
   tenantId: string,
 ) => {
   try {
@@ -127,12 +128,17 @@ const updateExam = async (
       throw new UnauthorizedError('You do not have access to this exam');
     }
 
+    console.log(typeof data.duration_minutes);
+
     await prisma.exam.update({
       where: {
         id: examId,
         tenant_id: tenantId,
       },
-      data: data as ExamUpdateInput,
+      data: {
+        ...data,
+        duration_minutes: convertSecToMill(data.duration_minutes as number),
+      },
     });
     return;
   } catch (error) {
@@ -141,7 +147,7 @@ const updateExam = async (
   }
 };
 
-const getExamByCode = async (code: string, userId: string, examId: string) => {
+const getExamByCode = async (code: string) => {
   try {
     if (!code) {
       throw new AppError({
@@ -153,15 +159,10 @@ const getExamByCode = async (code: string, userId: string, examId: string) => {
 
     const exam = await prisma.exam.findFirst({
       where: {
-        id: examId,
-        code,
+        code: code,
       },
       include: {
-        questions: {
-          omit: {
-            correct_answer: true,
-          },
-        },
+        questions: true,
       },
     });
 

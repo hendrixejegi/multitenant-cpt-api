@@ -1,21 +1,28 @@
-import { QuestionCreateInput } from '../generated/prisma/models';
-import { AppError, handlePrismaError } from '../utils/error';
+import {
+  QuestionCreateInput,
+  QuestionUpdateInput,
+} from '../generated/prisma/models';
+import { AppError, BadRequestError, handlePrismaError } from '../utils/error';
 import { prisma } from '../utils/prisma';
 import { RoleEnum } from '../generated/prisma/enums';
 import { ReasonPhrases, StatusCodes } from 'http-status-codes';
 
-const createQuestion = async (examId: string, data: QuestionCreateInput) => {
+const createQuestion = async (
+  examId: string,
+  data: Pick<QuestionCreateInput, 'text' | 'options' | 'correct_answer'>,
+) => {
   try {
     if (!data) {
       throw new AppError({
         status: StatusCodes.BAD_REQUEST,
         reason: ReasonPhrases.BAD_REQUEST,
-        message: 'Invalid exam data or tenant ID',
+        message: 'Question data is required',
       });
     }
+
     const question = await prisma.question.create({
       data: {
-        ...(data as QuestionCreateInput),
+        ...data,
         exam: {
           connect: {
             id: examId,
@@ -30,10 +37,7 @@ const createQuestion = async (examId: string, data: QuestionCreateInput) => {
   }
 };
 
-const getExamQuestionsandOptions = async (
-  examId: string,
-  userRole?: string,
-) => {
+const getExamQuestionsandOptions = async (examId: string) => {
   try {
     if (!examId) {
       throw new AppError({
@@ -43,12 +47,12 @@ const getExamQuestionsandOptions = async (
       });
     }
 
-    const isStudent = userRole === RoleEnum.STUDENT;
-
-    const examQuestionsandOptions = await prisma.question.findUnique({
-      omit: isStudent ? { correct_answer: true } : {},
+    const examQuestionsandOptions = await prisma.exam.findUnique({
       where: {
         id: examId,
+      },
+      include: {
+        questions: true,
       },
     });
 
@@ -67,4 +71,44 @@ const getExamQuestionsandOptions = async (
   }
 };
 
-export { createQuestion, getExamQuestionsandOptions };
+const deleteQuestion = async (examId: string, questionId: string) => {
+  if (!examId || !questionId) {
+    throw new BadRequestError('Exam ID and Question ID are required');
+  }
+
+  await prisma.question.delete({
+    where: {
+      id: questionId,
+      exam_id: examId,
+    },
+  });
+
+  return;
+};
+
+const updateQuestion = async (
+  examId: string,
+  questionId: string,
+  data: Pick<QuestionUpdateInput, 'text' | 'options' | 'correct_answer'>,
+) => {
+  if (!examId || !questionId) {
+    throw new BadRequestError('Exam ID and Question ID are required');
+  }
+
+  await prisma.question.update({
+    where: {
+      id: questionId,
+      exam_id: examId,
+    },
+    data,
+  });
+
+  return;
+};
+
+export {
+  createQuestion,
+  getExamQuestionsandOptions,
+  deleteQuestion,
+  updateQuestion,
+};
