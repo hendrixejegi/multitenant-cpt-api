@@ -1,0 +1,14 @@
+import type { Prisma } from '../prisma/client';
+import * as z from 'zod';
+import { AttemptOrderByWithRelationInputObjectSchema as AttemptOrderByWithRelationInputObjectSchema } from './objects/AttemptOrderByWithRelationInput.schema';
+import { AttemptWhereInputObjectSchema as AttemptWhereInputObjectSchema } from './objects/AttemptWhereInput.schema';
+import { AttemptWhereUniqueInputObjectSchema as AttemptWhereUniqueInputObjectSchema } from './objects/AttemptWhereUniqueInput.schema';
+import { AttemptCountAggregateInputObjectSchema as AttemptCountAggregateInputObjectSchema } from './objects/AttemptCountAggregateInput.schema';
+import { AttemptMinAggregateInputObjectSchema as AttemptMinAggregateInputObjectSchema } from './objects/AttemptMinAggregateInput.schema';
+import { AttemptMaxAggregateInputObjectSchema as AttemptMaxAggregateInputObjectSchema } from './objects/AttemptMaxAggregateInput.schema';
+import { AttemptAvgAggregateInputObjectSchema as AttemptAvgAggregateInputObjectSchema } from './objects/AttemptAvgAggregateInput.schema';
+import { AttemptSumAggregateInputObjectSchema as AttemptSumAggregateInputObjectSchema } from './objects/AttemptSumAggregateInput.schema';
+
+export const AttemptAggregateSchema: z.ZodType<Prisma.AttemptAggregateArgs> = z.object({ orderBy: z.union([AttemptOrderByWithRelationInputObjectSchema, AttemptOrderByWithRelationInputObjectSchema.array()]).optional(), where: AttemptWhereInputObjectSchema.optional(), cursor: AttemptWhereUniqueInputObjectSchema.optional(), take: z.number().optional(), skip: z.number().optional(), _count: z.union([ z.literal(true), AttemptCountAggregateInputObjectSchema ]).optional(), _min: AttemptMinAggregateInputObjectSchema.optional(), _max: AttemptMaxAggregateInputObjectSchema.optional(), _avg: AttemptAvgAggregateInputObjectSchema.optional(), _sum: AttemptSumAggregateInputObjectSchema.optional() }).strict() as unknown as z.ZodType<Prisma.AttemptAggregateArgs>;
+
+export const AttemptAggregateZodSchema = z.object({ orderBy: z.union([AttemptOrderByWithRelationInputObjectSchema, AttemptOrderByWithRelationInputObjectSchema.array()]).optional(), where: AttemptWhereInputObjectSchema.optional(), cursor: AttemptWhereUniqueInputObjectSchema.optional(), take: z.number().optional(), skip: z.number().optional(), _count: z.union([ z.literal(true), AttemptCountAggregateInputObjectSchema ]).optional(), _min: AttemptMinAggregateInputObjectSchema.optional(), _max: AttemptMaxAggregateInputObjectSchema.optional(), _avg: AttemptAvgAggregateInputObjectSchema.optional(), _sum: AttemptSumAggregateInputObjectSchema.optional() }).strict();
