@@ -1,276 +1,533 @@
 openapi: 3.0.0
 info:
-  title: Multi-tenant CBT
+  title: Multi-tenant CBT API
   version: 1.0.0
+  description: API documentation for the Multi-tenant CBT platform.
+
 servers:
   - url: http://{{baseurl}}
+
 tags:
-  - name: Attempt
-  - name: Exam
   - name: Authentication
-  - name: Tenant
+  - name: Exams
+  - name: Questions
+  - name: Tenants
+  - name: System
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    SuccessResponse:
+      type: object
+      properties:
+        type:
+          type: string
+          example: success
+        message:
+          type: string
+        data:
+          nullable: true
+
+    ErrorResponse:
+      type: object
+      properties:
+        type:
+          type: string
+          example: error
+        message:
+          type: string
+        errors:
+          type: array
+          items:
+            type: string
+
+    Tenant:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        slug:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        tenant_id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        email:
+          type: string
+          format: email
+        role:
+          type: string
+        is_guest:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+
+    Exam:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        tenant_id:
+          type: string
+          format: uuid
+        title:
+          type: string
+        description:
+          type: string
+        duration_minutes:
+          type: integer
+        code:
+          type: string
+        is_published:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+
+    Question:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        exam_id:
+          type: string
+          format: uuid
+        text:
+          type: string
+        options:
+          type: array
+          items:
+            type: string
+        correct_answer:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+
+    RegisterInput:
+      type: object
+      required:
+        - name
+        - email
+        - password
+        - organization_name
+        - organization_slug
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+        organization_name:
+          type: string
+        organization_slug:
+          type: string
+
+    LoginInput:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+
+    CreateExamInput:
+      type: object
+      required:
+        - title
+        - duration_minutes
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        duration_minutes:
+          type: integer
+          minimum: 1
+
+    UpdateExamInput:
+      type: object
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        duration_minutes:
+          type: integer
+
+    CreateQuestionInput:
+      type: object
+      required:
+        - text
+        - options
+        - correct_answer
+      properties:
+        text:
+          type: string
+        options:
+          type: array
+          items:
+            type: string
+        correct_answer:
+          type: string
+
+    UpdateQuestionInput:
+      type: object
+      properties:
+        text:
+          type: string
+        options:
+          type: array
+          items:
+            type: string
+        correct_answer:
+          type: string
+
 paths:
   /auth/register:
     post:
-      tags:
-        - Authentication
-      summary: Register
+      tags: [Authentication]
+      summary: Register tenant and admin user
       requestBody:
+        required: true
         content:
           application/json:
             schema:
-              type: object
-              example:
-                name: Hendrix
-                email: testuser@mail.com
-                password: password
-                organization_name: altschool
-                organization_slug: altschool
+              $ref: '#/components/schemas/RegisterInput'
       responses:
-        '200':
-          description: OK
-          headers:
-            X-Powered-By:
-              schema:
-                type: string
-                example: Express
-            Content-Type:
-              schema:
-                type: string
-                example: application/json; charset=utf-8
-            Content-Length:
-              schema:
-                type: integer
-                example: '417'
-            ETag:
-              schema:
-                type: string
-                example: W/"1a1-q2kTGq8j6pfd2Gv9P+uSInb0UqM"
-            Date:
-              schema:
-                type: string
-                example: Mon, 16 Feb 2026 15:29:29 GMT
-            Connection:
-              schema:
-                type: string
-                example: keep-alive
-            Keep-Alive:
-              schema:
-                type: string
-                example: timeout=5
+        '201':
+          description: Registration successful
           content:
-            text/plain:
+            application/json:
               schema:
-                type: string
-              example: |-
-                {
-                    "type": "success",
-                    "message": "Registration successful",
-                    "data": {
-                        "tenant": {
-                            "id": "a353f3d2-b36d-417d-a6e3-797a1dd01d25",
-                            "name": "altschool",
-                            "slug": "altschool",
-                            "created_at": "2026-02-16T15:29:26.354Z"
-                        },
-                        "user": {
-                            "id": "61c71134-3bd9-4328-b7c4-14f4636b35df",
-                            "tenant_id": "a353f3d2-b36d-417d-a6e3-797a1dd01d25",
-                            "name": "Hendrix",
-                            "email": "testuser@mail.com",
-                            "role": "ADMIN",
-                            "is_guest": false,
-                            "created_at": "2026-02-16T15:29:27.810Z"
-                        }
-                    }
-                }
+                $ref: '#/components/schemas/SuccessResponse'
+
   /auth/login:
     post:
-      tags:
-        - Authentication
-      summary: Login
+      tags: [Authentication]
+      summary: Login user
       requestBody:
+        required: true
         content:
           application/json:
             schema:
-              type: object
-              example:
-                email: testuser@mail.com
-                password: password
+              $ref: '#/components/schemas/LoginInput'
       responses:
         '200':
-          description: OK
-          headers:
-            X-Powered-By:
-              schema:
-                type: string
-                example: Express
-            Content-Type:
-              schema:
-                type: string
-                example: application/json; charset=utf-8
-            Content-Length:
-              schema:
-                type: integer
-                example: '267'
-            ETag:
-              schema:
-                type: string
-                example: W/"10b-XNTZKM2FJ9CY8wiZdT2ifule67o"
-            Date:
-              schema:
-                type: string
-                example: Mon, 16 Feb 2026 16:49:55 GMT
-            Connection:
-              schema:
-                type: string
-                example: keep-alive
-            Keep-Alive:
-              schema:
-                type: string
-                example: timeout=5
+          description: Login successful
           content:
-            text/plain:
+            application/json:
               schema:
-                type: string
-              example: |-
-                {
-                    "type": "success",
-                    "message": "OK",
-                    "data": {
-                        "token": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2MWM3MTEzNC0zYmQ5LTQzMjgtYjdjNC0xNGY0NjM2YjM1ZGYiLCJpYXQiOjE3NzEyNjA1OTUsImV4cCI6MTc3MTM0Njk5NX0.WVWQ2dfW1D2V5KgE82gEek7OjCvqSlX9JfT2DLqM1DU",
-                        "expires": 86400000
-                    }
-                }
+                $ref: '#/components/schemas/SuccessResponse'
+
   /auth/me:
     get:
-      tags:
-        - Authentication
-      summary: Me
-      parameters:
-        - name: Authorization
-          in: header
-          schema:
-            type: string
-          example: >-
-            Bearer
-            eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2MWM3MTEzNC0zYmQ5LTQzMjgtYjdjNC0xNGY0NjM2YjM1ZGYiLCJpYXQiOjE3NzEyNjA1OTUsImV4cCI6MTc3MTM0Njk5NX0.WVWQ2dfW1D2V5KgE82gEek7OjCvqSlX9JfT2DLqM1DU
+      tags: [Authentication]
+      summary: Get current authenticated user
+      security:
+        - BearerAuth: []
       responses:
         '200':
-          description: OK
-          headers:
-            X-Powered-By:
-              schema:
-                type: string
-                example: Express
-            Content-Type:
-              schema:
-                type: string
-                example: application/json; charset=utf-8
-            Content-Length:
-              schema:
-                type: integer
-                example: '254'
-            ETag:
-              schema:
-                type: string
-                example: W/"fe-0G+6ararKzc1rxA3iJL8CPl+bzQ"
-            Date:
-              schema:
-                type: string
-                example: Mon, 16 Feb 2026 16:56:15 GMT
-            Connection:
-              schema:
-                type: string
-                example: keep-alive
-            Keep-Alive:
-              schema:
-                type: string
-                example: timeout=5
+          description: Current user
           content:
-            text/plain:
+            application/json:
               schema:
-                type: string
-              example: |-
-                {
-                    "type": "success",
-                    "message": "OK",
-                    "data": {
-                        "id": "61c71134-3bd9-4328-b7c4-14f4636b35df",
-                        "tenant_id": "a353f3d2-b36d-417d-a6e3-797a1dd01d25",
-                        "name": "Hendrix",
-                        "email": "testuser@mail.com",
-                        "role": "ADMIN",
-                        "is_guest": false,
-                        "created_at": "2026-02-16T15:29:27.810Z"
-                    }
-                }
+                $ref: '#/components/schemas/SuccessResponse'
+
   /tenants/me:
     get:
-      tags:
-        - Tenant
-      summary: Me
+      tags: [Tenants]
+      summary: Get current tenant
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Current tenant
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+
+  /exams:
+    post:
+      tags: [Exams]
+      summary: Create exam
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateExamInput'
+      responses:
+        '201':
+          description: Exam created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+
+    get:
+      tags: [Exams]
+      summary: Get all exams
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Exams fetched
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+
+  /exams/{examId}:
+    get:
+      tags: [Exams]
+      summary: Get exam by ID
+      security:
+        - BearerAuth: []
       parameters:
-        - name: Authorization
-          in: header
+        - name: examId
+          in: path
+          required: true
           schema:
             type: string
-          example: >-
-            Bearer
-            eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2MWM3MTEzNC0zYmQ5LTQzMjgtYjdjNC0xNGY0NjM2YjM1ZGYiLCJpYXQiOjE3NzEyNjA1OTUsImV4cCI6MTc3MTM0Njk5NX0.WVWQ2dfW1D2V5KgE82gEek7OjCvqSlX9JfT2DLqM1DU
+            format: uuid
       responses:
         '200':
-          description: OK
-          headers:
-            X-Powered-By:
-              schema:
-                type: string
-                example: Express
-            Content-Type:
-              schema:
-                type: string
-                example: application/json; charset=utf-8
-            Content-Length:
-              schema:
-                type: integer
-                example: '149'
-            ETag:
-              schema:
-                type: string
-                example: W/"95-x+Th+Elt+O/xmrZPMsm/xqCc5t4"
-            Date:
-              schema:
-                type: string
-                example: Mon, 16 Feb 2026 22:50:32 GMT
-            Connection:
-              schema:
-                type: string
-                example: keep-alive
-            Keep-Alive:
-              schema:
-                type: string
-                example: timeout=5
+          description: Exam fetched
           content:
-            text/plain:
+            application/json:
               schema:
-                type: string
-              example: |-
-                {
-                    "type": "success",
-                    "data": {
-                        "id": "a353f3d2-b36d-417d-a6e3-797a1dd01d25",
-                        "name": "altschool",
-                        "slug": "altschool",
-                        "created_at": "2026-02-16T15:29:26.354Z"
-                    }
-                }
+                $ref: '#/components/schemas/SuccessResponse'
+
+    patch:
+      tags: [Exams]
+      summary: Update exam
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: examId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateExamInput'
+      responses:
+        '200':
+          description: Exam updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+
+    delete:
+      tags: [Exams]
+      summary: Delete exam
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: examId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Exam deleted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+
+  /exams/{examId}/publish:
+    patch:
+      tags: [Exams]
+      summary: Publish exam
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: examId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Exam published
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+
+  /exams/{examId}/unpublish:
+    patch:
+      tags: [Exams]
+      summary: Unpublish exam
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: examId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Exam unpublished
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+
+  /exams/{examId}/questions:
+    post:
+      tags: [Questions]
+      summary: Add question to exam
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: examId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateQuestionInput'
+      responses:
+        '201':
+          description: Question created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+
+    get:
+      tags: [Questions]
+      summary: Get exam questions
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: examId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Questions fetched
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+
+  /exams/{examId}/questions/{questionId}:
+    patch:
+      tags: [Questions]
+      summary: Update question
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: examId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: questionId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateQuestionInput'
+      responses:
+        '200':
+          description: Question updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+
+    delete:
+      tags: [Questions]
+      summary: Delete question
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: examId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: questionId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Question deleted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+
   /health:
     get:
-      tags:
-        - default
-      summary: Health
+      tags: [System]
+      summary: Health check
       responses:
         '200':
-          description: Successful response
-          content:
-            application/json: {}
+          description: Service is healthy
