@@ -109,19 +109,25 @@ const updateQuestion = catchAsync(async (req, res, next) => {
       text: true,
       options: true,
       correct_answer: true,
-    }),
+    }).partial(),
     req.body,
   );
 
-  await updateQuestionService(exam_id as string, question_id as string, {
-    text,
-    options: options as string[],
-    correct_answer,
-  });
+  const updateData: any = {};
+  if (text !== undefined) updateData.text = text;
+  if (options !== undefined) updateData.options = options;
+  if (correct_answer !== undefined) updateData.correct_answer = correct_answer;
+
+  const updatedQuestion = await updateQuestionService(
+    exam_id as string,
+    question_id as string,
+    updateData,
+  );
 
   res.status(StatusCodes.OK).json({
     type: 'success',
     message: 'Question updated successfully',
+    data: updatedQuestion,
   });
 });
 

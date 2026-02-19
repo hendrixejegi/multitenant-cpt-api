@@ -34,7 +34,7 @@ router
     requireRole(RoleEnum.ADMIN),
     getExamById,
   )
-  .put(
+  .patch(
     passport.authenticate('jwt', { session: false }),
     requireRole(RoleEnum.ADMIN),
     updateExam,
