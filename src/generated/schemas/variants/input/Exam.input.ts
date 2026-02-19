@@ -1,0 +1,17 @@
+import * as z from 'zod';
+// prettier-ignore
+export const ExamInputSchema = z.object({
+    id: z.string(),
+    tenant_id: z.string(),
+    title: z.string(),
+    description: z.string(),
+    duration_minutes: z.number().int(),
+    code: z.string(),
+    is_published: z.boolean(),
+    created_at: z.date(),
+    questions: z.array(z.unknown()),
+    attempts: z.array(z.unknown()),
+    tenant: z.unknown()
+}).strict();
+
+export type ExamInputType = z.infer<typeof ExamInputSchema>;
