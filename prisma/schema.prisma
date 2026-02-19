@@ -1,0 +1,101 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+generator zod {
+  provider = "prisma-zod-generator"
+  output   = "../src/generated"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum RoleEnum {
+  ADMIN
+  STUDENT
+}
+
+enum StatusEnum {
+  IN_PROGRESS
+  SUBMITTED
+  EXPIRED
+}
+
+// Represents a school, company, or institution using the platform
+model Tenant {
+  id         String   @id @default(uuid())
+  name       String
+  slug       String
+  created_at DateTime @default(now())
+
+  users User[]
+  exams Exam[]
+}
+
+// Represents both administrators and students
+model User {
+  id            String   @id @default(uuid())
+  tenant_id     String
+  name          String
+  email         String?
+  password_hash String?
+  role          RoleEnum
+  is_guest      Boolean
+  created_at    DateTime @default(now())
+
+  attempts Attempt[]
+  tenant   Tenant    @relation(fields: [tenant_id], references: [id])
+}
+
+// Represents an assessment created by an organization
+model Exam {
+  id               String   @id @default(uuid())
+  tenant_id        String
+  title            String
+  description      String
+  duration_minutes Int
+  code             String
+  is_published     Boolean
+  created_at       DateTime @default(now())
+
+  questions Question[]
+  attempts  Attempt[]
+  tenant    Tenant     @relation(fields: [tenant_id], references: [id])
+}
+
+// Represents a question withing an exam
+model Question {
+  id             String   @id @default(uuid())
+  exam_id        String
+  text           String
+  options        String[]
+  correct_answer String
+  created_at     DateTime @default(now())
+
+  exam Exam @relation(fields: [exam_id], references: [id])
+}
+
+// Represents a user taking an exam
+model Attempt {
+  id              String     @id @default(uuid())
+  user_id         String
+  exam_id         String
+  started_at      DateTime   @default(now())
+  submitted_at    DateTime
+  correct_answers Int        @default(0)
+  wrong_answers   Int        @default(0)
+  status          StatusEnum @default(IN_PROGRESS)
+  score           Int        @default(0)
+  created_at      DateTime   @default(now())
+
+  exam Exam @relation(fields: [exam_id], references: [id])
+  user User @relation(fields: [user_id], references: [id])
+}

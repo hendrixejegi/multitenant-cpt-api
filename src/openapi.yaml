@@ -1,0 +1,533 @@
+openapi: 3.0.0
+info:
+  title: Multi-tenant CBT API
+  version: 1.0.0
+  description: API documentation for the Multi-tenant CBT platform.
+
+servers:
+  - url: http://{{baseurl}}
+
+tags:
+  - name: Authentication
+  - name: Exams
+  - name: Questions
+  - name: Tenants
+  - name: System
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    SuccessResponse:
+      type: object
+      properties:
+        type:
+          type: string
+          example: success
+        message:
+          type: string
+        data:
+          nullable: true
+
+    ErrorResponse:
+      type: object
+      properties:
+        type:
+          type: string
+          example: error
+        message:
+          type: string
+        errors:
+          type: array
+          items:
+            type: string
+
+    Tenant:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        slug:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        tenant_id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        email:
+          type: string
+          format: email
+        role:
+          type: string
+        is_guest:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+
+    Exam:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        tenant_id:
+          type: string
+          format: uuid
+        title:
+          type: string
+        description:
+          type: string
+        duration_minutes:
+          type: integer
+        code:
+          type: string
+        is_published:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+
+    Question:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        exam_id:
+          type: string
+          format: uuid
+        text:
+          type: string
+        options:
+          type: array
+          items:
+            type: string
+        correct_answer:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+
+    RegisterInput:
+      type: object
+      required:
+        - name
+        - email
+        - password
+        - organization_name
+        - organization_slug
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+        organization_name:
+          type: string
+        organization_slug:
+          type: string
+
+    LoginInput:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+
+    CreateExamInput:
+      type: object
+      required:
+        - title
+        - duration_minutes
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        duration_minutes:
+          type: integer
+          minimum: 1
+
+    UpdateExamInput:
+      type: object
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        duration_minutes:
+          type: integer
+
+    CreateQuestionInput:
+      type: object
+      required:
+        - text
+        - options
+        - correct_answer
+      properties:
+        text:
+          type: string
+        options:
+          type: array
+          items:
+            type: string
+        correct_answer:
+          type: string
+
+    UpdateQuestionInput:
+      type: object
+      properties:
+        text:
+          type: string
+        options:
+          type: array
+          items:
+            type: string
+        correct_answer:
+          type: string
+
+paths:
+  /auth/register:
+    post:
+      tags: [Authentication]
+      summary: Register tenant and admin user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterInput'
+      responses:
+        '201':
+          description: Registration successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+
+  /auth/login:
+    post:
+      tags: [Authentication]
+      summary: Login user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginInput'
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+
+  /auth/me:
+    get:
+      tags: [Authentication]
+      summary: Get current authenticated user
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Current user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+
+  /tenants/me:
+    get:
+      tags: [Tenants]
+      summary: Get current tenant
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Current tenant
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+
+  /exams:
+    post:
+      tags: [Exams]
+      summary: Create exam
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateExamInput'
+      responses:
+        '201':
+          description: Exam created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+
+    get:
+      tags: [Exams]
+      summary: Get all exams
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Exams fetched
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+
+  /exams/{examId}:
+    get:
+      tags: [Exams]
+      summary: Get exam by ID
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: examId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Exam fetched
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+
+    patch:
+      tags: [Exams]
+      summary: Update exam
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: examId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateExamInput'
+      responses:
+        '200':
+          description: Exam updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+
+    delete:
+      tags: [Exams]
+      summary: Delete exam
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: examId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Exam deleted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+
+  /exams/{examId}/publish:
+    patch:
+      tags: [Exams]
+      summary: Publish exam
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: examId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Exam published
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+
+  /exams/{examId}/unpublish:
+    patch:
+      tags: [Exams]
+      summary: Unpublish exam
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: examId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Exam unpublished
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+
+  /exams/{examId}/questions:
+    post:
+      tags: [Questions]
+      summary: Add question to exam
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: examId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateQuestionInput'
+      responses:
+        '201':
+          description: Question created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+
+    get:
+      tags: [Questions]
+      summary: Get exam questions
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: examId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Questions fetched
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+
+  /exams/{examId}/questions/{questionId}:
+    patch:
+      tags: [Questions]
+      summary: Update question
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: examId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: questionId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateQuestionInput'
+      responses:
+        '200':
+          description: Question updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+
+    delete:
+      tags: [Questions]
+      summary: Delete question
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: examId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: questionId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Question deleted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+
+  /health:
+    get:
+      tags: [System]
+      summary: Health check
+      responses:
+        '200':
+          description: Service is healthy
