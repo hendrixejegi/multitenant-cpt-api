@@ -47,12 +47,16 @@ const getAllExams = catchAsync(async (req, res, next) => {
     throw new UnauthorizedError('User tenant not found');
   }
 
-  const exams = await getAllExamsService(user.tenant_id);
+  const page = parseInt(req.query.page as string) || 1;
+  const limit = parseInt(req.query.limit as string) || 10;
+
+  const result = await getAllExamsService(user.tenant_id, page, limit);
 
   res.status(StatusCodes.OK).json({
     type: 'success',
     message: 'Exams fetched successfully',
-    data: exams,
+    data: result.data,
+    pagination: result.pagination,
   });
 });
 

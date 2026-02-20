@@ -9,6 +9,10 @@ import {
   NotFoundError,
   UnauthorizedError,
 } from '../utils/error';
+import {
+  calculatePagination,
+  createPaginationResponse,
+} from '../utils/pagination';
 import { prisma } from '../utils/prisma';
 import { ReasonPhrases, StatusCodes } from 'http-status-codes';
 import { createExamCode, convertSecToMill } from '../utils/helpers';
@@ -45,7 +49,11 @@ const createExam = async (
   }
 };
 
-const getAllExams = async (tenantId: string) => {
+const getAllExams = async (
+  tenantId: string,
+  page: number = 1,
+  limit: number = 10,
+) => {
   try {
     if (!tenantId) {
       throw new AppError({
@@ -55,12 +63,27 @@ const getAllExams = async (tenantId: string) => {
       });
     }
 
-    const allExams = await prisma.exam.findMany({
-      where: {
-        tenant_id: tenantId,
-      },
-    });
-    return allExams;
+    const { skip, take } = calculatePagination(page, limit);
+
+    const [allExams, total] = await Promise.all([
+      prisma.exam.findMany({
+        where: {
+          tenant_id: tenantId,
+        },
+        skip,
+        take,
+        orderBy: {
+          created_at: 'desc',
+        },
+      }),
+      prisma.exam.count({
+        where: {
+          tenant_id: tenantId,
+        },
+      }),
+    ]);
+
+    return createPaginationResponse(allExams, total, page, limit);
   } catch (error) {
     handlePrismaError(error, 'Failed to fetch exams');
     throw error;
