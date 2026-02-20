@@ -89,21 +89,25 @@ const deleteQuestion = async (examId: string, questionId: string) => {
 const updateQuestion = async (
   examId: string,
   questionId: string,
-  data: Pick<QuestionUpdateInput, 'text' | 'options' | 'correct_answer'>,
+  data: Partial<
+    Pick<QuestionUpdateInput, 'text' | 'options' | 'correct_answer'>
+  >,
 ) => {
   if (!examId || !questionId) {
     throw new BadRequestError('Exam ID and Question ID are required');
   }
 
-  await prisma.question.update({
+  const updatedQuestion = await prisma.question.update({
     where: {
       id: questionId,
       exam_id: examId,
     },
-    data,
+    data: Object.fromEntries(
+      Object.entries(data).filter(([_, value]) => value !== undefined),
+    ),
   });
 
-  return;
+  return updatedQuestion;
 };
 
 export {

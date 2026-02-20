@@ -111,7 +111,9 @@ const deleteExam = async (examId: string, tenantId: string) => {
 
 const updateExam = async (
   examId: string,
-  data: Pick<ExamUpdateInput, 'title' | 'description' | 'duration_minutes'>,
+  data: Partial<
+    Pick<ExamUpdateInput, 'title' | 'description' | 'duration_minutes'>
+  >,
   tenantId: string,
 ) => {
   try {
@@ -128,19 +130,14 @@ const updateExam = async (
       throw new UnauthorizedError('You do not have access to this exam');
     }
 
-    console.log(typeof data.duration_minutes);
-
-    await prisma.exam.update({
+    const updatedExam = await prisma.exam.update({
       where: {
         id: examId,
         tenant_id: tenantId,
       },
-      data: {
-        ...data,
-        duration_minutes: convertSecToMill(data.duration_minutes as number),
-      },
+      data,
     });
-    return;
+    return updatedExam;
   } catch (error) {
     handlePrismaError(error, 'Failed to update exam');
     throw error;
