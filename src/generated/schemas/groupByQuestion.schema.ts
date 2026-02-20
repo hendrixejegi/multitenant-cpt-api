@@ -1,0 +1,13 @@
+import type { Prisma } from '../prisma/client';
+import * as z from 'zod';
+import { QuestionWhereInputObjectSchema as QuestionWhereInputObjectSchema } from './objects/QuestionWhereInput.schema';
+import { QuestionOrderByWithAggregationInputObjectSchema as QuestionOrderByWithAggregationInputObjectSchema } from './objects/QuestionOrderByWithAggregationInput.schema';
+import { QuestionScalarWhereWithAggregatesInputObjectSchema as QuestionScalarWhereWithAggregatesInputObjectSchema } from './objects/QuestionScalarWhereWithAggregatesInput.schema';
+import { QuestionScalarFieldEnumSchema } from './enums/QuestionScalarFieldEnum.schema';
+import { QuestionCountAggregateInputObjectSchema as QuestionCountAggregateInputObjectSchema } from './objects/QuestionCountAggregateInput.schema';
+import { QuestionMinAggregateInputObjectSchema as QuestionMinAggregateInputObjectSchema } from './objects/QuestionMinAggregateInput.schema';
+import { QuestionMaxAggregateInputObjectSchema as QuestionMaxAggregateInputObjectSchema } from './objects/QuestionMaxAggregateInput.schema';
+
+export const QuestionGroupBySchema: z.ZodType<Prisma.QuestionGroupByArgs> = z.object({ where: QuestionWhereInputObjectSchema.optional(), orderBy: z.union([QuestionOrderByWithAggregationInputObjectSchema, QuestionOrderByWithAggregationInputObjectSchema.array()]).optional(), having: QuestionScalarWhereWithAggregatesInputObjectSchema.optional(), take: z.number().optional(), skip: z.number().optional(), by: z.array(QuestionScalarFieldEnumSchema), _count: z.union([ z.literal(true), QuestionCountAggregateInputObjectSchema ]).optional(), _min: QuestionMinAggregateInputObjectSchema.optional(), _max: QuestionMaxAggregateInputObjectSchema.optional() }).strict() as unknown as z.ZodType<Prisma.QuestionGroupByArgs>;
+
+export const QuestionGroupByZodSchema = z.object({ where: QuestionWhereInputObjectSchema.optional(), orderBy: z.union([QuestionOrderByWithAggregationInputObjectSchema, QuestionOrderByWithAggregationInputObjectSchema.array()]).optional(), having: QuestionScalarWhereWithAggregatesInputObjectSchema.optional(), take: z.number().optional(), skip: z.number().optional(), by: z.array(QuestionScalarFieldEnumSchema), _count: z.union([ z.literal(true), QuestionCountAggregateInputObjectSchema ]).optional(), _min: QuestionMinAggregateInputObjectSchema.optional(), _max: QuestionMaxAggregateInputObjectSchema.optional() }).strict();

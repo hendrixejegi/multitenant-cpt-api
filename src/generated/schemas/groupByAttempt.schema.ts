@@ -1,0 +1,15 @@
+import type { Prisma } from '../prisma/client';
+import * as z from 'zod';
+import { AttemptWhereInputObjectSchema as AttemptWhereInputObjectSchema } from './objects/AttemptWhereInput.schema';
+import { AttemptOrderByWithAggregationInputObjectSchema as AttemptOrderByWithAggregationInputObjectSchema } from './objects/AttemptOrderByWithAggregationInput.schema';
+import { AttemptScalarWhereWithAggregatesInputObjectSchema as AttemptScalarWhereWithAggregatesInputObjectSchema } from './objects/AttemptScalarWhereWithAggregatesInput.schema';
+import { AttemptScalarFieldEnumSchema } from './enums/AttemptScalarFieldEnum.schema';
+import { AttemptCountAggregateInputObjectSchema as AttemptCountAggregateInputObjectSchema } from './objects/AttemptCountAggregateInput.schema';
+import { AttemptMinAggregateInputObjectSchema as AttemptMinAggregateInputObjectSchema } from './objects/AttemptMinAggregateInput.schema';
+import { AttemptMaxAggregateInputObjectSchema as AttemptMaxAggregateInputObjectSchema } from './objects/AttemptMaxAggregateInput.schema';
+import { AttemptAvgAggregateInputObjectSchema as AttemptAvgAggregateInputObjectSchema } from './objects/AttemptAvgAggregateInput.schema';
+import { AttemptSumAggregateInputObjectSchema as AttemptSumAggregateInputObjectSchema } from './objects/AttemptSumAggregateInput.schema';
+
+export const AttemptGroupBySchema: z.ZodType<Prisma.AttemptGroupByArgs> = z.object({ where: AttemptWhereInputObjectSchema.optional(), orderBy: z.union([AttemptOrderByWithAggregationInputObjectSchema, AttemptOrderByWithAggregationInputObjectSchema.array()]).optional(), having: AttemptScalarWhereWithAggregatesInputObjectSchema.optional(), take: z.number().optional(), skip: z.number().optional(), by: z.array(AttemptScalarFieldEnumSchema), _count: z.union([ z.literal(true), AttemptCountAggregateInputObjectSchema ]).optional(), _min: AttemptMinAggregateInputObjectSchema.optional(), _max: AttemptMaxAggregateInputObjectSchema.optional(), _avg: AttemptAvgAggregateInputObjectSchema.optional(), _sum: AttemptSumAggregateInputObjectSchema.optional() }).strict() as unknown as z.ZodType<Prisma.AttemptGroupByArgs>;
+
+export const AttemptGroupByZodSchema = z.object({ where: AttemptWhereInputObjectSchema.optional(), orderBy: z.union([AttemptOrderByWithAggregationInputObjectSchema, AttemptOrderByWithAggregationInputObjectSchema.array()]).optional(), having: AttemptScalarWhereWithAggregatesInputObjectSchema.optional(), take: z.number().optional(), skip: z.number().optional(), by: z.array(AttemptScalarFieldEnumSchema), _count: z.union([ z.literal(true), AttemptCountAggregateInputObjectSchema ]).optional(), _min: AttemptMinAggregateInputObjectSchema.optional(), _max: AttemptMaxAggregateInputObjectSchema.optional(), _avg: AttemptAvgAggregateInputObjectSchema.optional(), _sum: AttemptSumAggregateInputObjectSchema.optional() }).strict();
