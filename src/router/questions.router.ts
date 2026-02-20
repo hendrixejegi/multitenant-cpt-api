@@ -31,7 +31,7 @@ router
     requireRole(RoleEnum.ADMIN),
     deleteQuestion,
   )
-  .put(
+  .patch(
     passport.authenticate('jwt', { session: false }),
     requireRole(RoleEnum.ADMIN),
     updateQuestion,
