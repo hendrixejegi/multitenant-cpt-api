@@ -181,10 +181,12 @@ const getExamByCode = async (code: string) => {
       where: {
         code: code,
       },
-      include: {
-        questions: true,
-      },
+      include: { questions: true },
     });
+
+    if (!exam) {
+      throw new NotFoundError('Exam not found');
+    }
 
     return exam;
   } catch (error) {

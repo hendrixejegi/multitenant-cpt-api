@@ -89,7 +89,7 @@ model Attempt {
   user_id         String
   exam_id         String
   started_at      DateTime   @default(now())
-  submitted_at    DateTime
+  submitted_at    DateTime?
   correct_answers Int        @default(0)
   wrong_answers   Int        @default(0)
   status          StatusEnum @default(IN_PROGRESS)

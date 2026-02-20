@@ -1,6 +1,7 @@
 import * as z from 'zod';
 import type { Prisma } from '../../prisma/client';
 import { SortOrderSchema } from '../enums/SortOrder.schema';
+import { SortOrderInputObjectSchema as SortOrderInputObjectSchema } from './SortOrderInput.schema';
 import { AttemptCountOrderByAggregateInputObjectSchema as AttemptCountOrderByAggregateInputObjectSchema } from './AttemptCountOrderByAggregateInput.schema';
 import { AttemptAvgOrderByAggregateInputObjectSchema as AttemptAvgOrderByAggregateInputObjectSchema } from './AttemptAvgOrderByAggregateInput.schema';
 import { AttemptMaxOrderByAggregateInputObjectSchema as AttemptMaxOrderByAggregateInputObjectSchema } from './AttemptMaxOrderByAggregateInput.schema';
@@ -12,7 +13,7 @@ const makeSchema = () => z.object({
   user_id: SortOrderSchema.optional(),
   exam_id: SortOrderSchema.optional(),
   started_at: SortOrderSchema.optional(),
-  submitted_at: SortOrderSchema.optional(),
+  submitted_at: z.union([SortOrderSchema, z.lazy(() => SortOrderInputObjectSchema)]).optional(),
   correct_answers: SortOrderSchema.optional(),
   wrong_answers: SortOrderSchema.optional(),
   status: SortOrderSchema.optional(),

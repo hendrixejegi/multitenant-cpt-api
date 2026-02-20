@@ -6,7 +6,7 @@ export const AttemptInputSchema = z.object({
     user_id: z.string(),
     exam_id: z.string(),
     started_at: z.date(),
-    submitted_at: z.date(),
+    submitted_at: z.date().optional().nullable(),
     correct_answers: z.number().int(),
     wrong_answers: z.number().int(),
     status: StatusEnumSchema,
