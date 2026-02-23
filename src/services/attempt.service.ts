@@ -86,7 +86,10 @@ async function updateAttemptStatus(attemptId: string, status: StatusEnum) {
   return status;
 }
 
-async function calculateAttemptScore(attemptId: string) {
+async function calculateAttemptScore(
+  attemptId: string,
+  totalQuestions: number,
+) {
   const attempt = await getAttemptById(attemptId);
   prisma.$disconnect();
 
@@ -94,11 +97,10 @@ async function calculateAttemptScore(attemptId: string) {
     throw new NotFoundError(`Attempt with id: ${attemptId} does not exist`);
   }
 
-  const { correct_answers = 0, wrong_answers = 0 } = attempt;
-  const totalQuestionsAnswered = correct_answers + wrong_answers;
+  const { correct_answers = 0 } = attempt;
 
-  if (totalQuestionsAnswered === 0) return 0;
-  const score = Math.round((correct_answers / totalQuestionsAnswered) * 100);
+  if (totalQuestions === 0 || correct_answers === 0) return 0;
+  const score = Math.round((correct_answers / totalQuestions) * 100);
 
   try {
     await prisma.attempt.update({ where: { id: attemptId }, data: { score } });
