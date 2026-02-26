@@ -6,6 +6,7 @@ import passport from 'passport';
 import type { ApiResponse } from './types/api';
 import { prisma } from './utils/prisma';
 import router from './router';
+import studentRoutes from './router/student.router';
 import swaggerUi from 'swagger-ui-express';
 import YAML from 'yamljs';
 
@@ -20,6 +21,8 @@ app.use(passport.initialize());
 app.get('/api/health', (req: Request, res: Response<ApiResponse>) => {
   res.status(200).json({ type: 'success', message: 'Server is healthy' });
 });
+
+app.use('/api', studentRoutes);  
 app.use('/api', router);
 app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
