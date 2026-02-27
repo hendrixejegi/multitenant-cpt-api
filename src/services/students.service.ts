@@ -3,7 +3,7 @@ import { RoleEnum } from '../generated/prisma/enums';
 import { getExamByCode } from './exam.service';
 import { createUser, issueJwt } from './auth.service';
 import { BadRequestError, NotFoundError } from '../utils/error';
-import { createAttempt } from './attempt.service';
+import { createAttempt, getAttemptById } from './attempt.service';
 
 interface IStudentService {
   examCode: string;
@@ -40,7 +40,7 @@ const startExam = async (data: IStudentService) => {
 
   const token = issueJwt(user, exam.duration_minutes);
 
-  await createAttempt({
+  const attempt = await createAttempt({
     exam: {
       connect: {
         id: exam.id,
@@ -53,7 +53,17 @@ const startExam = async (data: IStudentService) => {
     },
   });
 
-  return { token, user, exam };
+  return { token, user, exam, attempt };
 };
 
-export { startExam };
+const getAttempt = async (attemptId: string) => {
+  if (attemptId) {
+    throw new BadRequestError('Attempt ID is required');
+  }
+
+  const attempt = await getAttemptById(attemptId);
+
+  return attempt;
+};
+
+export { startExam, getAttempt };

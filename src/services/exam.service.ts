@@ -90,7 +90,11 @@ const getAllExams = async (
   }
 };
 
-const getExamById = async (examId: string, tenantId: string) => {
+const getExamById = async (
+  examId: string,
+  tenantId: string,
+  includeQuestions?: boolean,
+) => {
   if (!tenantId) {
     throw new BadRequestError('Tenant ID is required');
   }
@@ -100,6 +104,7 @@ const getExamById = async (examId: string, tenantId: string) => {
       id: examId,
       tenant_id: tenantId,
     },
+    include: includeQuestions ? { questions: true } : undefined,
   });
 
   return exam;
