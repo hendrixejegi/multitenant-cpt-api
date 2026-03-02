@@ -116,6 +116,16 @@ async function calculateAttemptScore(
   return score;
 }
 
+async function getAttemptsByExamId(id: string) {
+  try {
+    const attempts = await prisma.attempt.findMany({ where: { exam_id: id } });
+    return attempts;
+  } catch (error) {
+    handlePrismaError(error, 'Failed to fetch attempts with exam Id');
+    throw error;
+  }
+}
+
 export {
   createAttempt,
   getAttemptById,
@@ -123,4 +133,5 @@ export {
   incrementWrongAnswers,
   updateAttemptStatus,
   calculateAttemptScore,
+  getAttemptsByExamId,
 };
