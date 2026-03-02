@@ -92,7 +92,7 @@ const getAllExams = async (
 
 const getExamById = async (
   examId: string,
-  tenantId: string,
+  tenantId?: string,
   includeQuestions?: boolean,
 ) => {
   if (!tenantId) {

@@ -1,5 +1,10 @@
 import { Router } from 'express';
-import { startExam, getAttempt } from '../controllers/students.controller';
+import {
+  startExam,
+  getStudentAttempt,
+  checkAnswer,
+  submitAnswers,
+} from '../controllers/students.controller';
 import passport from 'passport';
 import { requireRole } from '../middlewares/permission.middleware';
 import { RoleEnum } from '../generated/prisma/enums';
@@ -9,11 +14,27 @@ const router = Router();
 router.route('/exams/start').post(startExam);
 
 router
-  .route('/attempt/:attempt_id')
+  .route('/attempts/:attempt_id')
   .get(
     passport.authenticate('jwt', { session: false }),
     requireRole(RoleEnum.STUDENT),
-    getAttempt,
+    getStudentAttempt,
+  );
+
+router
+  .route('/attempts/:attemptId/answer')
+  .post(
+    passport.authenticate('jwt', { session: false }),
+    requireRole(RoleEnum.STUDENT),
+    checkAnswer,
+  );
+
+router
+  .route('/attempts/:attemptId/submit')
+  .post(
+    passport.authenticate('jwt', { session: false }),
+    requireRole(RoleEnum.STUDENT),
+    submitAnswers,
   );
 
 export default router;

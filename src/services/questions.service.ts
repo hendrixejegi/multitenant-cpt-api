@@ -86,6 +86,20 @@ const deleteQuestion = async (examId: string, questionId: string) => {
   return;
 };
 
+const getQuestionById = async (questionId: string) => {
+  if (!questionId) {
+    throw new BadRequestError('Question ID is required');
+  }
+
+  const question = await prisma.question.findUnique({
+    where: {
+      id: questionId,
+    },
+  });
+
+  return question;
+};
+
 const updateQuestion = async (
   examId: string,
   questionId: string,
@@ -115,4 +129,5 @@ export {
   getExamQuestionsandOptions,
   deleteQuestion,
   updateQuestion,
+  getQuestionById,
 };

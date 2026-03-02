@@ -1,7 +1,12 @@
 import { StatusCodes } from 'http-status-codes';
 import catchAsync from '../utils/catchAsync';
 import { zodParse } from '../utils/zod-parse';
-import { startExam as startExamService } from '../services/students.service';
+import {
+  startExam as startExamService,
+  getAttempt as getAttemptService,
+  checkAnswer as checkAnswerService,
+  submit as submitService,
+} from '../services/students.service';
 import z from 'zod';
 import {
   AttemptArgsObjectZodSchema,
@@ -29,7 +34,7 @@ const startExam = catchAsync(async (req, res) => {
   });
 });
 
-const getAttempt = catchAsync(async (req, res) => {
+const getStudentAttempt = catchAsync(async (req, res) => {
   const user = req.user as User;
   const { id } = zodParse(
     AttemptCreateInputObjectZodSchema.pick({ id: true }),
@@ -38,9 +43,10 @@ const getAttempt = catchAsync(async (req, res) => {
     },
   );
 
-  console.log(user);
+  console.log(user || 'No user found');
 
-  const attempt = await getAttemptById(id as string);
+  const attempt = await getAttemptService(id as string);
+  console.log(attempt || 'No attempt found');
 
   const exam = await getExamById(
     attempt?.exam_id as string,
@@ -58,4 +64,51 @@ const getAttempt = catchAsync(async (req, res) => {
   });
 });
 
-export { startExam, getAttempt };
+const checkAnswer = catchAsync(async (req, res, next) => {
+  const { answer, questionId } = zodParse(
+    z.strictObject({
+      answer: z.string(),
+      questionId: z.string(),
+    }),
+    req.body,
+  );
+
+  const attempt = await getAttemptById(req.params.attemptId as string);
+
+  if (!attempt) {
+    throw new Error('Attempt not found');
+  }
+
+  await checkAnswerService(attempt.id, answer, questionId);
+
+  res.status(StatusCodes.OK).json({
+    success: true,
+    message: 'Answer checked successfully',
+  });
+});
+
+const submitAnswers = catchAsync(async (req, res) => {
+  const { answer, questionId } = zodParse(
+    z.strictObject({
+      answer: z.string(),
+      questionId: z.string(),
+    }),
+    req.body,
+  );
+
+  const attempt = await getAttemptById(req.params.attemptId as string);
+
+  if (!attempt) {
+    throw new Error('Attempt not found');
+  }
+
+  const result = await submitService(attempt.id, questionId, answer);
+
+  res.status(StatusCodes.OK).json({
+    success: true,
+    message: 'Answer submitted successfully',
+    data: result,
+  });
+});
+
+export { startExam, getStudentAttempt, checkAnswer, submitAnswers };
