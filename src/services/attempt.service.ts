@@ -10,7 +10,9 @@ async function createAttempt(data: AttemptCreateInput) {
 }
 
 async function getAttemptById(id: string) {
-  const attempt = await prisma.attempt.findUnique({ where: { id } });
+  const attempt = await prisma.attempt.findUnique({
+    where: { id },
+  });
   prisma.$disconnect();
   return attempt;
 }

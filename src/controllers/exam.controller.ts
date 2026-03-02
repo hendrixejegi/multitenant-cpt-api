@@ -13,7 +13,7 @@ import {
 } from '../services/exam.service';
 import { zodParse } from '../utils/zod-parse';
 import { ExamCreateInputObjectZodSchema } from '../generated/schemas';
-import { convertSecToMill } from '../utils/helpers';
+import { convertMinToMill } from '../utils/helpers';
 
 const createExam = catchAsync(async (req, res, next) => {
   const user = req.user as User;
@@ -132,7 +132,7 @@ const updateExam = catchAsync(async (req, res, next) => {
   if (title !== undefined) updateData.title = title;
   if (description !== undefined) updateData.description = description;
   if (duration_minutes !== undefined)
-    updateData.duration_minutes = convertSecToMill(duration_minutes);
+    updateData.duration_minutes = convertMinToMill(duration_minutes);
 
   const updatedExam = await updateExamService(
     id as string,

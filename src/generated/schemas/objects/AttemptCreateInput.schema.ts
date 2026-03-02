@@ -7,7 +7,7 @@ import { UserCreateNestedOneWithoutAttemptsInputObjectSchema as UserCreateNested
 const makeSchema = () => z.object({
   id: z.string().optional(),
   started_at: z.coerce.date().optional(),
-  submitted_at: z.coerce.date(),
+  submitted_at: z.coerce.date().optional().nullable(),
   correct_answers: z.number().int().optional(),
   wrong_answers: z.number().int().optional(),
   status: StatusEnumSchema.optional(),

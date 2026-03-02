@@ -15,7 +15,7 @@ import {
 } from '../utils/pagination';
 import { prisma } from '../utils/prisma';
 import { ReasonPhrases, StatusCodes } from 'http-status-codes';
-import { createExamCode, convertSecToMill } from '../utils/helpers';
+import { createExamCode, convertMinToMill } from '../utils/helpers';
 
 const createExam = async (
   data: Pick<ExamCreateInput, 'title' | 'description' | 'duration_minutes'>,
@@ -32,7 +32,7 @@ const createExam = async (
     const exam = await prisma.exam.create({
       data: {
         ...data,
-        duration_minutes: convertSecToMill(data.duration_minutes),
+        duration_minutes: convertMinToMill(data.duration_minutes),
         code: createExamCode(),
         is_published: false,
         tenant: {
@@ -90,7 +90,11 @@ const getAllExams = async (
   }
 };
 
-const getExamById = async (examId: string, tenantId: string) => {
+const getExamById = async (
+  examId: string,
+  tenantId?: string,
+  includeQuestions?: boolean,
+) => {
   if (!tenantId) {
     throw new BadRequestError('Tenant ID is required');
   }
@@ -100,6 +104,7 @@ const getExamById = async (examId: string, tenantId: string) => {
       id: examId,
       tenant_id: tenantId,
     },
+    include: includeQuestions ? { questions: true } : undefined,
   });
 
   return exam;
@@ -181,10 +186,12 @@ const getExamByCode = async (code: string) => {
       where: {
         code: code,
       },
-      include: {
-        questions: true,
-      },
+      include: { questions: true },
     });
+
+    if (!exam) {
+      throw new NotFoundError('Exam not found');
+    }
 
     return exam;
   } catch (error) {

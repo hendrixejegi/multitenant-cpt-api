@@ -222,7 +222,7 @@ export type AttemptGroupByOutputType = {
   user_id: string
   exam_id: string
   started_at: Date
-  submitted_at: Date
+  submitted_at: Date | null
   correct_answers: number
   wrong_answers: number
   status: $Enums.StatusEnum
@@ -258,7 +258,7 @@ export type AttemptWhereInput = {
   user_id?: Prisma.StringFilter<"Attempt"> | string
   exam_id?: Prisma.StringFilter<"Attempt"> | string
   started_at?: Prisma.DateTimeFilter<"Attempt"> | Date | string
-  submitted_at?: Prisma.DateTimeFilter<"Attempt"> | Date | string
+  submitted_at?: Prisma.DateTimeNullableFilter<"Attempt"> | Date | string | null
   correct_answers?: Prisma.IntFilter<"Attempt"> | number
   wrong_answers?: Prisma.IntFilter<"Attempt"> | number
   status?: Prisma.EnumStatusEnumFilter<"Attempt"> | $Enums.StatusEnum
@@ -273,7 +273,7 @@ export type AttemptOrderByWithRelationInput = {
   user_id?: Prisma.SortOrder
   exam_id?: Prisma.SortOrder
   started_at?: Prisma.SortOrder
-  submitted_at?: Prisma.SortOrder
+  submitted_at?: Prisma.SortOrderInput | Prisma.SortOrder
   correct_answers?: Prisma.SortOrder
   wrong_answers?: Prisma.SortOrder
   status?: Prisma.SortOrder
@@ -291,7 +291,7 @@ export type AttemptWhereUniqueInput = Prisma.AtLeast<{
   user_id?: Prisma.StringFilter<"Attempt"> | string
   exam_id?: Prisma.StringFilter<"Attempt"> | string
   started_at?: Prisma.DateTimeFilter<"Attempt"> | Date | string
-  submitted_at?: Prisma.DateTimeFilter<"Attempt"> | Date | string
+  submitted_at?: Prisma.DateTimeNullableFilter<"Attempt"> | Date | string | null
   correct_answers?: Prisma.IntFilter<"Attempt"> | number
   wrong_answers?: Prisma.IntFilter<"Attempt"> | number
   status?: Prisma.EnumStatusEnumFilter<"Attempt"> | $Enums.StatusEnum
@@ -306,7 +306,7 @@ export type AttemptOrderByWithAggregationInput = {
   user_id?: Prisma.SortOrder
   exam_id?: Prisma.SortOrder
   started_at?: Prisma.SortOrder
-  submitted_at?: Prisma.SortOrder
+  submitted_at?: Prisma.SortOrderInput | Prisma.SortOrder
   correct_answers?: Prisma.SortOrder
   wrong_answers?: Prisma.SortOrder
   status?: Prisma.SortOrder
@@ -327,7 +327,7 @@ export type AttemptScalarWhereWithAggregatesInput = {
   user_id?: Prisma.StringWithAggregatesFilter<"Attempt"> | string
   exam_id?: Prisma.StringWithAggregatesFilter<"Attempt"> | string
   started_at?: Prisma.DateTimeWithAggregatesFilter<"Attempt"> | Date | string
-  submitted_at?: Prisma.DateTimeWithAggregatesFilter<"Attempt"> | Date | string
+  submitted_at?: Prisma.DateTimeNullableWithAggregatesFilter<"Attempt"> | Date | string | null
   correct_answers?: Prisma.IntWithAggregatesFilter<"Attempt"> | number
   wrong_answers?: Prisma.IntWithAggregatesFilter<"Attempt"> | number
   status?: Prisma.EnumStatusEnumWithAggregatesFilter<"Attempt"> | $Enums.StatusEnum
@@ -338,7 +338,7 @@ export type AttemptScalarWhereWithAggregatesInput = {
 export type AttemptCreateInput = {
   id?: string
   started_at?: Date | string
-  submitted_at: Date | string
+  submitted_at?: Date | string | null
   correct_answers?: number
   wrong_answers?: number
   status?: $Enums.StatusEnum
@@ -353,7 +353,7 @@ export type AttemptUncheckedCreateInput = {
   user_id: string
   exam_id: string
   started_at?: Date | string
-  submitted_at: Date | string
+  submitted_at?: Date | string | null
   correct_answers?: number
   wrong_answers?: number
   status?: $Enums.StatusEnum
@@ -364,7 +364,7 @@ export type AttemptUncheckedCreateInput = {
 export type AttemptUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   started_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  submitted_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  submitted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   correct_answers?: Prisma.IntFieldUpdateOperationsInput | number
   wrong_answers?: Prisma.IntFieldUpdateOperationsInput | number
   status?: Prisma.EnumStatusEnumFieldUpdateOperationsInput | $Enums.StatusEnum
@@ -379,7 +379,7 @@ export type AttemptUncheckedUpdateInput = {
   user_id?: Prisma.StringFieldUpdateOperationsInput | string
   exam_id?: Prisma.StringFieldUpdateOperationsInput | string
   started_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  submitted_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  submitted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   correct_answers?: Prisma.IntFieldUpdateOperationsInput | number
   wrong_answers?: Prisma.IntFieldUpdateOperationsInput | number
   status?: Prisma.EnumStatusEnumFieldUpdateOperationsInput | $Enums.StatusEnum
@@ -392,7 +392,7 @@ export type AttemptCreateManyInput = {
   user_id: string
   exam_id: string
   started_at?: Date | string
-  submitted_at: Date | string
+  submitted_at?: Date | string | null
   correct_answers?: number
   wrong_answers?: number
   status?: $Enums.StatusEnum
@@ -403,7 +403,7 @@ export type AttemptCreateManyInput = {
 export type AttemptUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   started_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  submitted_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  submitted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   correct_answers?: Prisma.IntFieldUpdateOperationsInput | number
   wrong_answers?: Prisma.IntFieldUpdateOperationsInput | number
   status?: Prisma.EnumStatusEnumFieldUpdateOperationsInput | $Enums.StatusEnum
@@ -416,7 +416,7 @@ export type AttemptUncheckedUpdateManyInput = {
   user_id?: Prisma.StringFieldUpdateOperationsInput | string
   exam_id?: Prisma.StringFieldUpdateOperationsInput | string
   started_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  submitted_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  submitted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   correct_answers?: Prisma.IntFieldUpdateOperationsInput | number
   wrong_answers?: Prisma.IntFieldUpdateOperationsInput | number
   status?: Prisma.EnumStatusEnumFieldUpdateOperationsInput | $Enums.StatusEnum
@@ -569,6 +569,10 @@ export type AttemptUncheckedUpdateManyWithoutExamNestedInput = {
   deleteMany?: Prisma.AttemptScalarWhereInput | Prisma.AttemptScalarWhereInput[]
 }
 
+export type NullableDateTimeFieldUpdateOperationsInput = {
+  set?: Date | string | null
+}
+
 export type EnumStatusEnumFieldUpdateOperationsInput = {
   set?: $Enums.StatusEnum
 }
@@ -576,7 +580,7 @@ export type EnumStatusEnumFieldUpdateOperationsInput = {
 export type AttemptCreateWithoutUserInput = {
   id?: string
   started_at?: Date | string
-  submitted_at: Date | string
+  submitted_at?: Date | string | null
   correct_answers?: number
   wrong_answers?: number
   status?: $Enums.StatusEnum
@@ -589,7 +593,7 @@ export type AttemptUncheckedCreateWithoutUserInput = {
   id?: string
   exam_id: string
   started_at?: Date | string
-  submitted_at: Date | string
+  submitted_at?: Date | string | null
   correct_answers?: number
   wrong_answers?: number
   status?: $Enums.StatusEnum
@@ -631,7 +635,7 @@ export type AttemptScalarWhereInput = {
   user_id?: Prisma.StringFilter<"Attempt"> | string
   exam_id?: Prisma.StringFilter<"Attempt"> | string
   started_at?: Prisma.DateTimeFilter<"Attempt"> | Date | string
-  submitted_at?: Prisma.DateTimeFilter<"Attempt"> | Date | string
+  submitted_at?: Prisma.DateTimeNullableFilter<"Attempt"> | Date | string | null
   correct_answers?: Prisma.IntFilter<"Attempt"> | number
   wrong_answers?: Prisma.IntFilter<"Attempt"> | number
   status?: Prisma.EnumStatusEnumFilter<"Attempt"> | $Enums.StatusEnum
@@ -642,7 +646,7 @@ export type AttemptScalarWhereInput = {
 export type AttemptCreateWithoutExamInput = {
   id?: string
   started_at?: Date | string
-  submitted_at: Date | string
+  submitted_at?: Date | string | null
   correct_answers?: number
   wrong_answers?: number
   status?: $Enums.StatusEnum
@@ -655,7 +659,7 @@ export type AttemptUncheckedCreateWithoutExamInput = {
   id?: string
   user_id: string
   started_at?: Date | string
-  submitted_at: Date | string
+  submitted_at?: Date | string | null
   correct_answers?: number
   wrong_answers?: number
   status?: $Enums.StatusEnum
@@ -693,7 +697,7 @@ export type AttemptCreateManyUserInput = {
   id?: string
   exam_id: string
   started_at?: Date | string
-  submitted_at: Date | string
+  submitted_at?: Date | string | null
   correct_answers?: number
   wrong_answers?: number
   status?: $Enums.StatusEnum
@@ -704,7 +708,7 @@ export type AttemptCreateManyUserInput = {
 export type AttemptUpdateWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   started_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  submitted_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  submitted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   correct_answers?: Prisma.IntFieldUpdateOperationsInput | number
   wrong_answers?: Prisma.IntFieldUpdateOperationsInput | number
   status?: Prisma.EnumStatusEnumFieldUpdateOperationsInput | $Enums.StatusEnum
@@ -717,7 +721,7 @@ export type AttemptUncheckedUpdateWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   exam_id?: Prisma.StringFieldUpdateOperationsInput | string
   started_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  submitted_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  submitted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   correct_answers?: Prisma.IntFieldUpdateOperationsInput | number
   wrong_answers?: Prisma.IntFieldUpdateOperationsInput | number
   status?: Prisma.EnumStatusEnumFieldUpdateOperationsInput | $Enums.StatusEnum
@@ -729,7 +733,7 @@ export type AttemptUncheckedUpdateManyWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   exam_id?: Prisma.StringFieldUpdateOperationsInput | string
   started_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  submitted_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  submitted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   correct_answers?: Prisma.IntFieldUpdateOperationsInput | number
   wrong_answers?: Prisma.IntFieldUpdateOperationsInput | number
   status?: Prisma.EnumStatusEnumFieldUpdateOperationsInput | $Enums.StatusEnum
@@ -741,7 +745,7 @@ export type AttemptCreateManyExamInput = {
   id?: string
   user_id: string
   started_at?: Date | string
-  submitted_at: Date | string
+  submitted_at?: Date | string | null
   correct_answers?: number
   wrong_answers?: number
   status?: $Enums.StatusEnum
@@ -752,7 +756,7 @@ export type AttemptCreateManyExamInput = {
 export type AttemptUpdateWithoutExamInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   started_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  submitted_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  submitted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   correct_answers?: Prisma.IntFieldUpdateOperationsInput | number
   wrong_answers?: Prisma.IntFieldUpdateOperationsInput | number
   status?: Prisma.EnumStatusEnumFieldUpdateOperationsInput | $Enums.StatusEnum
@@ -765,7 +769,7 @@ export type AttemptUncheckedUpdateWithoutExamInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   user_id?: Prisma.StringFieldUpdateOperationsInput | string
   started_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  submitted_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  submitted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   correct_answers?: Prisma.IntFieldUpdateOperationsInput | number
   wrong_answers?: Prisma.IntFieldUpdateOperationsInput | number
   status?: Prisma.EnumStatusEnumFieldUpdateOperationsInput | $Enums.StatusEnum
@@ -777,7 +781,7 @@ export type AttemptUncheckedUpdateManyWithoutExamInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   user_id?: Prisma.StringFieldUpdateOperationsInput | string
   started_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  submitted_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  submitted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   correct_answers?: Prisma.IntFieldUpdateOperationsInput | number
   wrong_answers?: Prisma.IntFieldUpdateOperationsInput | number
   status?: Prisma.EnumStatusEnumFieldUpdateOperationsInput | $Enums.StatusEnum
@@ -870,7 +874,7 @@ export type $AttemptPayload<ExtArgs extends runtime.Types.Extensions.InternalArg
     user_id: string
     exam_id: string
     started_at: Date
-    submitted_at: Date
+    submitted_at: Date | null
     correct_answers: number
     wrong_answers: number
     status: $Enums.StatusEnum
