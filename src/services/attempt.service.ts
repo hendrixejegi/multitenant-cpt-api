@@ -12,13 +12,6 @@ async function createAttempt(data: AttemptCreateInput) {
 async function getAttemptById(id: string) {
   const attempt = await prisma.attempt.findUnique({
     where: { id },
-    include: {
-      exam: {
-        include: {
-          questions: true,
-        },
-      },
-    },
   });
   prisma.$disconnect();
   return attempt;

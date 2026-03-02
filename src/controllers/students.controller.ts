@@ -102,7 +102,12 @@ const submitAnswers = catchAsync(async (req, res) => {
     throw new Error('Attempt not found');
   }
 
-  const result = await submitService(attempt.id, questionId, answer);
+  const result = await submitService(
+    attempt.id,
+    questionId,
+    attempt.exam_id,
+    answer,
+  );
 
   res.status(StatusCodes.OK).json({
     success: true,

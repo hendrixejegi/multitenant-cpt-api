@@ -106,13 +106,17 @@ const getAttempt = async (attemptId: string) => {
 const submit = async (
   attemptId: string,
   questionId: string,
+  examId: string,
   answer: string,
 ) => {
   if (!attemptId) {
     throw new BadRequestError('Attempt ID is required');
   }
 
-  const attempt = await getAttemptById(attemptId);
+  const attempt = await prisma.attempt.findUnique({
+    where: { id: attemptId },
+    include: { exam: true },
+  });
 
   if (!attempt) {
     throw new NotFoundError('Attempt not found');
@@ -134,9 +138,15 @@ const submit = async (
     await incrementWrongAnswers(attempt.id);
   }
 
+  const exam = await getExamById(examId, attempt.exam.tenant_id, true);
+
+  if (!exam) {
+    throw new NotFoundError('Question not found');
+  }
+
   const score = await calculateAttemptScore(
     attempt.id,
-    attempt.exam.questions?.length || 0,
+    (exam as any)?.questions?.length || 0,
   );
 
   return {
