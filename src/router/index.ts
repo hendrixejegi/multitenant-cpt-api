@@ -4,6 +4,7 @@ import authRouter from './auth.router';
 import questionsRouter from './questions.router';
 import tenantRouter from './tenant.router';
 import studentsRouter from './students.router';
+import attemptsRouter from './attempt.router';
 
 const router = Router();
 
@@ -27,6 +28,10 @@ const defaultRoutes = [
   {
     path: '/students',
     route: studentsRouter,
+  },
+  {
+    path: '/attempts',
+    route: attemptsRouter,
   },
 ];
 

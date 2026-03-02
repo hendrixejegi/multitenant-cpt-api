@@ -1,4 +1,8 @@
-import { UnauthorizedError, BadRequestError } from '../utils/error';
+import {
+  UnauthorizedError,
+  BadRequestError,
+  NotFoundError,
+} from '../utils/error';
 import { User } from '../generated/prisma/client';
 import { StatusCodes } from 'http-status-codes';
 import catchAsync from '../utils/catchAsync';
@@ -14,6 +18,9 @@ import {
 import { zodParse } from '../utils/zod-parse';
 import { ExamCreateInputObjectZodSchema } from '../generated/schemas';
 import { convertMinToMill } from '../utils/helpers';
+import { ApiResponse } from '../types/api';
+import { Request, Response } from 'express';
+import { getAttemptsByExamId } from '../services/attempt.service';
 
 const createExam = catchAsync(async (req, res, next) => {
   const user = req.user as User;
@@ -177,6 +184,27 @@ const updateExamStatus = catchAsync(async (req, res, next) => {
   });
 });
 
+async function getAllExamAttempts(
+  req: Request<{ examId: string }>,
+  res: Response<ApiResponse>,
+) {
+  const allowed = zodParse(ExamCreateInputObjectZodSchema.pick({ id: true }), {
+    id: req.params.examId,
+  });
+
+  const user = 'user' in req && (req.user as User);
+
+  if (user === false || user === undefined) {
+    throw new UnauthorizedError();
+  }
+
+  const exam = await getExamByIdService(allowed.id ?? '', user.tenant_id);
+  if (exam === null) throw new NotFoundError('No exam found');
+
+  const attempts = await getAttemptsByExamId(exam.id);
+  res.status(StatusCodes.OK).json({ type: 'success', data: attempts });
+}
+
 export {
   createExam,
   getAllExams,
@@ -184,4 +212,5 @@ export {
   deleteExam,
   updateExam,
   updateExamStatus,
+  getAllExamAttempts,
 };
