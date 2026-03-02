@@ -15,7 +15,7 @@ import {
 } from '../utils/pagination';
 import { prisma } from '../utils/prisma';
 import { ReasonPhrases, StatusCodes } from 'http-status-codes';
-import { createExamCode, convertSecToMill } from '../utils/helpers';
+import { createExamCode, convertMinToMill } from '../utils/helpers';
 
 const createExam = async (
   data: Pick<ExamCreateInput, 'title' | 'description' | 'duration_minutes'>,
@@ -32,7 +32,7 @@ const createExam = async (
     const exam = await prisma.exam.create({
       data: {
         ...data,
-        duration_minutes: convertSecToMill(data.duration_minutes),
+        duration_minutes: convertMinToMill(data.duration_minutes),
         code: createExamCode(),
         is_published: false,
         tenant: {
