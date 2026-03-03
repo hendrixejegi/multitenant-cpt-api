@@ -2,22 +2,23 @@ import type { AttemptCreateInput } from '../generated/prisma/models';
 import { handlePrismaError, NotFoundError } from '../utils/error';
 import { prisma } from '../utils/prisma';
 import { StatusEnum } from '../generated/prisma/enums';
+import { getExamById } from './exam.service';
+import { getExamQuestionsandOptions } from './questions.service';
 
 async function createAttempt(data: AttemptCreateInput) {
   const attempt = await prisma.attempt.create({ data });
-  prisma.$disconnect();
   return attempt;
 }
 
 async function getAttemptById(id: string) {
-  const attempt = await prisma.attempt.findUnique({ where: { id } });
-  prisma.$disconnect();
+  const attempt = await prisma.attempt.findUnique({
+    where: { id },
+  });
   return attempt;
 }
 
 async function incrementCorrectAnswers(attemptId: string) {
   const attempt = await getAttemptById(attemptId);
-  prisma.$disconnect();
 
   if (attempt === null) {
     throw new NotFoundError(`Attempt with id: ${attemptId} does not exist`);
@@ -33,8 +34,6 @@ async function incrementCorrectAnswers(attemptId: string) {
   } catch (error) {
     handlePrismaError(error, `Failed to update attempt with id: ${attemptId}`);
     throw error;
-  } finally {
-    prisma.$disconnect();
   }
 
   return attempt.correct_answers;
@@ -42,7 +41,6 @@ async function incrementCorrectAnswers(attemptId: string) {
 
 async function incrementWrongAnswers(attemptId: string) {
   const attempt = await getAttemptById(attemptId);
-  prisma.$disconnect();
 
   if (attempt === null) {
     throw new NotFoundError(`Attempt with id: ${attemptId} does not exist`);
@@ -58,8 +56,6 @@ async function incrementWrongAnswers(attemptId: string) {
   } catch (error) {
     handlePrismaError(error, `Failed to update attempt with id: ${attemptId}`);
     throw error;
-  } finally {
-    prisma.$disconnect();
   }
 
   return attempt.wrong_answers;
@@ -79,8 +75,6 @@ async function updateAttemptStatus(attemptId: string, status: StatusEnum) {
   } catch (error) {
     handlePrismaError(error, `Failed to update attempt with id: ${attemptId}`);
     throw error;
-  } finally {
-    prisma.$disconnect();
   }
 
   return status;
@@ -88,28 +82,37 @@ async function updateAttemptStatus(attemptId: string, status: StatusEnum) {
 
 async function calculateAttemptScore(attemptId: string) {
   const attempt = await getAttemptById(attemptId);
-  prisma.$disconnect();
 
   if (attempt === null) {
     throw new NotFoundError(`Attempt with id: ${attemptId} does not exist`);
   }
 
-  const { correct_answers = 0, wrong_answers = 0 } = attempt;
-  const totalQuestionsAnswered = correct_answers + wrong_answers;
+  const { correct_answers = 0, exam_id } = attempt;
 
-  if (totalQuestionsAnswered === 0) return 0;
-  const score = Math.round((correct_answers / totalQuestionsAnswered) * 100);
+  const totalQuestions = (await getExamQuestionsandOptions(exam_id)).questions
+    .length;
+
+  if (totalQuestions === 0 || correct_answers === 0) return 0;
+  const score = Math.round((correct_answers / totalQuestions) * 100);
 
   try {
     await prisma.attempt.update({ where: { id: attemptId }, data: { score } });
   } catch (error) {
     handlePrismaError(error, `Failed to update attempt with id: ${attemptId}`);
     throw error;
-  } finally {
-    prisma.$disconnect();
   }
 
   return score;
+}
+
+async function getAttemptsByExamId(id: string) {
+  try {
+    const attempts = await prisma.attempt.findMany({ where: { exam_id: id } });
+    return attempts;
+  } catch (error) {
+    handlePrismaError(error, 'Failed to fetch attempts with exam Id');
+    throw error;
+  }
 }
 
 export {
@@ -119,4 +122,5 @@ export {
   incrementWrongAnswers,
   updateAttemptStatus,
   calculateAttemptScore,
+  getAttemptsByExamId,
 };

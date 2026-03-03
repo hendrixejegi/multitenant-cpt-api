@@ -7,7 +7,7 @@ const makeSchema = () => z.object({
   user_id: z.string(),
   exam_id: z.string(),
   started_at: z.coerce.date().optional(),
-  submitted_at: z.coerce.date(),
+  submitted_at: z.coerce.date().optional().nullable(),
   correct_answers: z.number().int().optional(),
   wrong_answers: z.number().int().optional(),
   status: StatusEnumSchema.optional(),

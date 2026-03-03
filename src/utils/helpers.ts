@@ -3,6 +3,6 @@ export const createExamCode = () => {
   return code;
 };
 
-export const convertSecToMill = (sec: number) => {
-  return sec * 1000;
+export const convertMinToMill = (min: number) => {
+  return min * 60 * 1000;
 };

@@ -9,6 +9,7 @@ import {
   updateExam,
   updateExamStatus,
   deleteExam,
+  getAllExamAttempts,
 } from '../controllers/exam.controller';
 
 const router = Router();
@@ -60,4 +61,10 @@ router
     requireRole(RoleEnum.ADMIN),
     updateExamStatus,
   );
+
+router.get('/:examId/attempts', [
+  passport.authenticate('jwt', { session: false }),
+  requireRole(RoleEnum.ADMIN),
+  getAllExamAttempts,
+]);
 export default router;

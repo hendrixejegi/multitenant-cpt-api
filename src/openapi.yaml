@@ -13,6 +13,8 @@ tags:
   - name: Questions
   - name: Tenants
   - name: System
+  - name: Attempts
+  - name: Students
 
 components:
   securitySchemes:
@@ -32,6 +34,7 @@ components:
           type: string
         data:
           nullable: true
+          type: object
 
     ErrorResponse:
       type: object
@@ -126,6 +129,36 @@ components:
           type: string
           format: date-time
 
+    Attempt:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        user_id:
+          type: string
+          format: uuid
+        exam_id:
+          type: string
+          format: uuid
+        started_at:
+          type: string
+          format: date-time
+        submitted_at:
+          type: string
+          format: date-time
+        correct_answers:
+          type: integer
+        wrong_answers:
+          type: integer
+        status:
+          type: string
+        score:
+          type: integer
+        created_at:
+          type: string
+          format: date-time
+
     RegisterInput:
       type: object
       required:
@@ -210,6 +243,26 @@ components:
             type: string
         correct_answer:
           type: string
+
+    StartExamInput:
+      type: object
+      properties:
+        examCode:
+          type: string
+        name:
+          type: string
+        email:
+          type: string
+          format: email
+
+    SubmitAnswerInput:
+      type: object
+      properties:
+        answer:
+          type: string
+        questionId:
+          type: string
+          format: uuid
 
 paths:
   /auth/register:
@@ -519,6 +572,114 @@ paths:
       responses:
         '200':
           description: Question deleted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+
+  /attempts/{attemptId}:
+    get:
+      tags: [Attempts]
+      summary: Get attempt by id
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: attemptId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Attempt fetched
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+
+  /students/exams/start:
+    post:
+      tags: [Students]
+      summary: Start exam
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StartExamInput'
+      responses:
+        '200':
+          description: Exam started
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+
+  /students/attempts/{attemptId}:
+    get:
+      tags: [Students]
+      summary: Get attempt by id
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: attemptId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Attempt fetched
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+
+  /students/attempts/{attemptId}/answer:
+    post:
+      tags: [Students]
+      summary: Submit answer
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: attemptId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SubmitAnswerInput'
+      responses:
+        '200':
+          description: Answer submitted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+
+  /students/attempts/{attemptId}/submit:
+    patch:
+      tags: [Students]
+      summary: Submit attempt
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: attemptId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Attempt submitted
           content:
             application/json:
               schema:

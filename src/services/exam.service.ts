@@ -9,9 +9,13 @@ import {
   NotFoundError,
   UnauthorizedError,
 } from '../utils/error';
+import {
+  calculatePagination,
+  createPaginationResponse,
+} from '../utils/pagination';
 import { prisma } from '../utils/prisma';
 import { ReasonPhrases, StatusCodes } from 'http-status-codes';
-import { createExamCode, convertSecToMill } from '../utils/helpers';
+import { createExamCode, convertMinToMill } from '../utils/helpers';
 
 const createExam = async (
   data: Pick<ExamCreateInput, 'title' | 'description' | 'duration_minutes'>,
@@ -28,7 +32,7 @@ const createExam = async (
     const exam = await prisma.exam.create({
       data: {
         ...data,
-        duration_minutes: convertSecToMill(data.duration_minutes),
+        duration_minutes: convertMinToMill(data.duration_minutes),
         code: createExamCode(),
         is_published: false,
         tenant: {
@@ -45,7 +49,11 @@ const createExam = async (
   }
 };
 
-const getAllExams = async (tenantId: string) => {
+const getAllExams = async (
+  tenantId: string,
+  page: number = 1,
+  limit: number = 10,
+) => {
   try {
     if (!tenantId) {
       throw new AppError({
@@ -55,19 +63,38 @@ const getAllExams = async (tenantId: string) => {
       });
     }
 
-    const allExams = await prisma.exam.findMany({
-      where: {
-        tenant_id: tenantId,
-      },
-    });
-    return allExams;
+    const { skip, take } = calculatePagination(page, limit);
+
+    const [allExams, total] = await Promise.all([
+      prisma.exam.findMany({
+        where: {
+          tenant_id: tenantId,
+        },
+        skip,
+        take,
+        orderBy: {
+          created_at: 'desc',
+        },
+      }),
+      prisma.exam.count({
+        where: {
+          tenant_id: tenantId,
+        },
+      }),
+    ]);
+
+    return createPaginationResponse(allExams, total, page, limit);
   } catch (error) {
     handlePrismaError(error, 'Failed to fetch exams');
     throw error;
   }
 };
 
-const getExamById = async (examId: string, tenantId: string) => {
+const getExamById = async (
+  examId: string,
+  tenantId?: string,
+  includeQuestions?: boolean,
+) => {
   if (!tenantId) {
     throw new BadRequestError('Tenant ID is required');
   }
@@ -77,6 +104,7 @@ const getExamById = async (examId: string, tenantId: string) => {
       id: examId,
       tenant_id: tenantId,
     },
+    include: includeQuestions ? { questions: true } : undefined,
   });
 
   return exam;
@@ -158,10 +186,12 @@ const getExamByCode = async (code: string) => {
       where: {
         code: code,
       },
-      include: {
-        questions: true,
-      },
+      include: { questions: true },
     });
+
+    if (!exam) {
+      throw new NotFoundError('Exam not found');
+    }
 
     return exam;
   } catch (error) {

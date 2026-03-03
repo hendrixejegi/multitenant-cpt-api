@@ -1,4 +1,8 @@
-import { UnauthorizedError, BadRequestError } from '../utils/error';
+import {
+  UnauthorizedError,
+  BadRequestError,
+  NotFoundError,
+} from '../utils/error';
 import { User } from '../generated/prisma/client';
 import { StatusCodes } from 'http-status-codes';
 import catchAsync from '../utils/catchAsync';
@@ -13,7 +17,10 @@ import {
 } from '../services/exam.service';
 import { zodParse } from '../utils/zod-parse';
 import { ExamCreateInputObjectZodSchema } from '../generated/schemas';
-import { convertSecToMill } from '../utils/helpers';
+import { convertMinToMill } from '../utils/helpers';
+import { ApiResponse } from '../types/api';
+import { Request, Response } from 'express';
+import { getAttemptsByExamId } from '../services/attempt.service';
 
 const createExam = catchAsync(async (req, res, next) => {
   const user = req.user as User;
@@ -47,12 +54,16 @@ const getAllExams = catchAsync(async (req, res, next) => {
     throw new UnauthorizedError('User tenant not found');
   }
 
-  const exams = await getAllExamsService(user.tenant_id);
+  const page = parseInt(req.query.page as string) || 1;
+  const limit = parseInt(req.query.limit as string) || 10;
+
+  const result = await getAllExamsService(user.tenant_id, page, limit);
 
   res.status(StatusCodes.OK).json({
     type: 'success',
     message: 'Exams fetched successfully',
-    data: exams,
+    data: result.data,
+    pagination: result.pagination,
   });
 });
 
@@ -128,7 +139,7 @@ const updateExam = catchAsync(async (req, res, next) => {
   if (title !== undefined) updateData.title = title;
   if (description !== undefined) updateData.description = description;
   if (duration_minutes !== undefined)
-    updateData.duration_minutes = convertSecToMill(duration_minutes);
+    updateData.duration_minutes = convertMinToMill(duration_minutes);
 
   const updatedExam = await updateExamService(
     id as string,
@@ -173,6 +184,27 @@ const updateExamStatus = catchAsync(async (req, res, next) => {
   });
 });
 
+async function getAllExamAttempts(
+  req: Request<{ examId: string }>,
+  res: Response<ApiResponse>,
+) {
+  const allowed = zodParse(ExamCreateInputObjectZodSchema.pick({ id: true }), {
+    id: req.params.examId,
+  });
+
+  const user = 'user' in req && (req.user as User);
+
+  if (user === false || user === undefined) {
+    throw new UnauthorizedError();
+  }
+
+  const exam = await getExamByIdService(allowed.id ?? '', user.tenant_id);
+  if (exam === null) throw new NotFoundError('No exam found');
+
+  const attempts = await getAttemptsByExamId(exam.id);
+  res.status(StatusCodes.OK).json({ type: 'success', data: attempts });
+}
+
 export {
   createExam,
   getAllExams,
@@ -180,4 +212,5 @@ export {
   deleteExam,
   updateExam,
   updateExamStatus,
+  getAllExamAttempts,
 };
