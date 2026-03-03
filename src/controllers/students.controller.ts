@@ -88,26 +88,7 @@ const checkAnswer = catchAsync(async (req, res, next) => {
 });
 
 const submitAnswers = catchAsync(async (req, res) => {
-  const { answer, questionId } = zodParse(
-    z.strictObject({
-      answer: z.string(),
-      questionId: z.string(),
-    }),
-    req.body,
-  );
-
-  const attempt = await getAttemptById(req.params.attemptId as string);
-
-  if (!attempt) {
-    throw new Error('Attempt not found');
-  }
-
-  const result = await submitService(
-    attempt.id,
-    questionId,
-    attempt.exam_id,
-    answer,
-  );
+  const result = await submitService(req.params.attemptId as string);
 
   res.status(StatusCodes.OK).json({
     success: true,
