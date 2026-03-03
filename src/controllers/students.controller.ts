@@ -92,7 +92,7 @@ const submitAnswers = catchAsync(async (req, res) => {
 
   res.status(StatusCodes.OK).json({
     success: true,
-    message: 'Answer submitted successfully',
+    message: 'Submission successful',
     data: result,
   });
 });

@@ -1,8 +1,12 @@
 import { prisma } from '../utils/prisma';
-import { RoleEnum } from '../generated/prisma/enums';
+import { RoleEnum, StatusEnum } from '../generated/prisma/enums';
 import { getExamByCode, getExamById } from './exam.service';
 import { createUser, issueJwt } from './auth.service';
-import { BadRequestError, NotFoundError } from '../utils/error';
+import {
+  BadRequestError,
+  handlePrismaError,
+  NotFoundError,
+} from '../utils/error';
 import {
   calculateAttemptScore,
   createAttempt,
@@ -104,27 +108,30 @@ const getAttempt = async (attemptId: string) => {
 };
 
 const submit = async (attemptId: string) => {
+  let updatedAttempt;
+
   if (!attemptId) {
     throw new BadRequestError('Attempt ID is required');
   }
 
-  const attempt = await prisma.attempt.findUnique({
-    where: { id: attemptId },
-    include: { exam: true },
-  });
+  const score = await calculateAttemptScore(attemptId);
 
-  if (!attempt) {
-    throw new NotFoundError('Attempt not found');
+  try {
+    updatedAttempt = await prisma.attempt.update({
+      where: { id: attemptId },
+      data: { status: StatusEnum.SUBMITTED },
+    });
+  } catch (error) {
+    handlePrismaError(
+      error,
+      'Failed to update attempt status after submission',
+    );
+    throw error;
   }
-
-  const score = await calculateAttemptScore(
-    attempt.id,
-    (attempt.exam as any)?.questions?.length || 0,
-  );
 
   return {
     score,
-    attempt,
+    attempt: updatedAttempt,
   };
 };
 
