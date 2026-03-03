@@ -5,7 +5,7 @@
   "scripts": {
     "build": "prisma generate && prisma migrate deploy && tsc",
     "start": "node dist/app.js",
-    "dev": "nodemon",
+    "dev": "prisma generate  && prisma migrate deploy && nodemon",
     "lint": "eslint 'src/**/*.ts'"
   },
   "repository": {

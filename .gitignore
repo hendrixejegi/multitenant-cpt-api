@@ -140,3 +140,4 @@ vite.config.ts.timestamp-*
 
 # Prisma
 src/script.ts
+src/generated
