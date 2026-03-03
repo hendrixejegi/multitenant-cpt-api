@@ -103,12 +103,7 @@ const getAttempt = async (attemptId: string) => {
   return attempt;
 };
 
-const submit = async (
-  attemptId: string,
-  questionId: string,
-  examId: string,
-  answer: string,
-) => {
+const submit = async (attemptId: string) => {
   if (!attemptId) {
     throw new BadRequestError('Attempt ID is required');
   }
@@ -122,31 +117,9 @@ const submit = async (
     throw new NotFoundError('Attempt not found');
   }
 
-  if (!questionId) {
-    throw new NotFoundError('Question not found');
-  }
-
-  const question = await getQuestionById(questionId);
-
-  if (!question) {
-    throw new NotFoundError('Question not found');
-  }
-
-  if (question.correct_answer === answer) {
-    await incrementCorrectAnswers(attempt.id);
-  } else {
-    await incrementWrongAnswers(attempt.id);
-  }
-
-  const exam = await getExamById(examId, attempt.exam.tenant_id, true);
-
-  if (!exam) {
-    throw new NotFoundError('Question not found');
-  }
-
   const score = await calculateAttemptScore(
     attempt.id,
-    (exam as any)?.questions?.length || 0,
+    (attempt.exam as any)?.questions?.length || 0,
   );
 
   return {
