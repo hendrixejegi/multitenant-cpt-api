@@ -3,7 +3,7 @@ import {
   startExam,
   getStudentAttempt,
   checkAnswer,
-  submitAnswers,
+  submitAttempt,
 } from '../controllers/students.controller';
 import passport from 'passport';
 import { requireRole } from '../middlewares/permission.middleware';
@@ -31,10 +31,10 @@ router
 
 router
   .route('/attempts/:attemptId/submit')
-  .post(
+  .patch(
     passport.authenticate('jwt', { session: false }),
     requireRole(RoleEnum.STUDENT),
-    submitAnswers,
+    submitAttempt,
   );
 
 export default router;

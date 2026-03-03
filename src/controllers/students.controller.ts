@@ -87,7 +87,7 @@ const checkAnswer = catchAsync(async (req, res, next) => {
   });
 });
 
-const submitAnswers = catchAsync(async (req, res) => {
+const submitAttempt = catchAsync(async (req, res) => {
   const result = await submitService(req.params.attemptId as string);
 
   res.status(StatusCodes.OK).json({
@@ -97,4 +97,4 @@ const submitAnswers = catchAsync(async (req, res) => {
   });
 });
 
-export { startExam, getStudentAttempt, checkAnswer, submitAnswers };
+export { startExam, getStudentAttempt, checkAnswer, submitAttempt };
