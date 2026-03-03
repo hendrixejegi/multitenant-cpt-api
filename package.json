@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "",
   "scripts": {
-    "build": "tsc",
+    "build": "prisma generate && prisma migrate deploy && tsc",
     "start": "node dist/app.js",
     "dev": "nodemon",
     "lint": "eslint 'src/**/*.ts'"
